@@ -54,7 +54,6 @@ if ( -d $opts{'path'})
     @files  = <$opts{'path'}/*>;
 }
 
-
 foreach my $file ( @files )
 {
     verbose ($file);
@@ -91,36 +90,57 @@ foreach my $game ( sort keys %Games )
     }
     if ( $found == 0 )
     {
+        # If we are here, you have no good dump for your rom
+	# It should not happen a lot (1% maximum)
         print "SHIT!: $game has no GOOD DUMP\n";
     }
     else
     {
+        # Big elsif cascade to match priority
+	# Best file for me is country (E), and perfectly dumped [!] like :
+	# Air Diver (E) [!].bin
         if    ( $Games{$game}{'E'}{'!'}     ) { `cp -a "$Games{$game}{'E'}{'!'}"     $opts{'dest'}` }
+	# I can accept Mixed country including Europe :
         elsif ( $Games{$game}{'JUE'}{'!'}   ) { `cp -a "$Games{$game}{'JUE'}{'!'}"   $opts{'dest'}` }
         elsif ( $Games{$game}{'UJE'}{'!'}   ) { `cp -a "$Games{$game}{'UJE'}{'!'}"   $opts{'dest'}` }
         elsif ( $Games{$game}{'UEJ'}{'!'}   ) { `cp -a "$Games{$game}{'UEJ'}{'!'}"   $opts{'dest'}` }
         elsif ( $Games{$game}{'JE'}{'!'}    ) { `cp -a "$Games{$game}{'JE'}{'!'}"    $opts{'dest'}` }
         elsif ( $Games{$game}{'UE'}{'!'}    ) { `cp -a "$Games{$game}{'UE'}{'!'}"    $opts{'dest'}` }
-        elsif ( $Games{$game}{'W'}{'!'}    ) { `cp -a "$Games{$game}{'W'}{'!'}"    $opts{'dest'}` }
+	# If not, World or USA is OK
+        elsif ( $Games{$game}{'W'}{'!'}     ) { `cp -a "$Games{$game}{'W'}{'!'}"     $opts{'dest'}` }
         elsif ( $Games{$game}{'U'}{'!'}     ) { `cp -a "$Games{$game}{'U'}{'!'}"     $opts{'dest'}` }
-        elsif ( $Games{$game}{'UJ'}{'!'}     ) { `cp -a "$Games{$game}{'UJ'}{'!'}"     $opts{'dest'}` }
-        elsif ( $Games{$game}{'JU'}{'!'}     ) { `cp -a "$Games{$game}{'JU'}{'!'}"     $opts{'dest'}` }
+	# Eventually, USA+Japan
+        elsif ( $Games{$game}{'UJ'}{'!'}    ) { `cp -a "$Games{$game}{'UJ'}{'!'}"    $opts{'dest'}` }
+        elsif ( $Games{$game}{'JU'}{'!'}    ) { `cp -a "$Games{$game}{'JU'}{'!'}"    $opts{'dest'}` }
+	# Shit, no other choces, the perfect dump is available only in (J)
         elsif ( $Games{$game}{'J'}{'!'}     ) { `cp -a "$Games{$game}{'J'}{'!'}"     $opts{'dest'}` }
 
+        # But sometimes, the perfect dump does not exist
+	# We have to accpept file like this as best shot :
+	# Air Diver (E).bin
         elsif ( $Games{$game}{'E'}{'RAW'}   ) { `cp -a "$Games{$game}{'E'}{'RAW'}"   $opts{'dest'}` }
+	# I can accept Mixed country including Europe :
         elsif ( $Games{$game}{'JUE'}{'RAW'} ) { `cp -a "$Games{$game}{'JUE'}{'RAW'}" $opts{'dest'}` }
         elsif ( $Games{$game}{'UJE'}{'RAW'} ) { `cp -a "$Games{$game}{'UJE'}{'RAW'}" $opts{'dest'}` }
         elsif ( $Games{$game}{'UEJ'}{'RAW'} ) { `cp -a "$Games{$game}{'UEJ'}{'RAW'}" $opts{'dest'}` }
         elsif ( $Games{$game}{'JE'}{'RAW'}  ) { `cp -a "$Games{$game}{'JE'}{'RAW'}"  $opts{'dest'}` }
         elsif ( $Games{$game}{'UE'}{'RAW'}  ) { `cp -a "$Games{$game}{'UE'}{'RAW'}"  $opts{'dest'}` }
-        elsif ( $Games{$game}{'W'}{'RAW'}  ) { `cp -a "$Games{$game}{'W'}{'RAW'}"  $opts{'dest'}` }
+	# If not, World or USA is OK
+        elsif ( $Games{$game}{'W'}{'RAW'}   ) { `cp -a "$Games{$game}{'W'}{'RAW'}"   $opts{'dest'}` }
         elsif ( $Games{$game}{'U'}{'RAW'}   ) { `cp -a "$Games{$game}{'U'}{'RAW'}"   $opts{'dest'}` }
-        elsif ( $Games{$game}{'UJ'}{'RAW'}   ) { `cp -a "$Games{$game}{'UJ'}{'RAW'}"   $opts{'dest'}` }
-        elsif ( $Games{$game}{'JU'}{'RAW'}   ) { `cp -a "$Games{$game}{'JU'}{'RAW'}"   $opts{'dest'}` }
+	# Eventually, USA+Japan
+        elsif ( $Games{$game}{'UJ'}{'RAW'}  ) { `cp -a "$Games{$game}{'UJ'}{'RAW'}"  $opts{'dest'}` }
+        elsif ( $Games{$game}{'JU'}{'RAW'}  ) { `cp -a "$Games{$game}{'JU'}{'RAW'}"  $opts{'dest'}` }
+	# Shit, no other choces, the perfect dump is available only in (J)
         elsif ( $Games{$game}{'J'}{'RAW'}   ) { `cp -a "$Games{$game}{'J'}{'RAW'}"   $opts{'dest'}` }
         
+	# Or sometimes, for example with NGP, you can have a [M] tag :
         elsif ( $Games{$game}{'W'}{'M'}     ) { `cp -a "$Games{$game}{'W'}{'M'}"     $opts{'dest'}` }
         elsif ( $Games{$game}{'J'}{'M'}     ) { `cp -a "$Games{$game}{'J'}{'M'}"     $opts{'dest'}` }
 
-    }
+        # This big if is here to pick the best chice for me
+	# if you want different priorities, juste move the lines
+	# Highest priority is on top
+	# TODO: Integrate a --{europe,usa,japan} to define your priority
+   }
 }
