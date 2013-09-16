@@ -32,14 +32,14 @@ sub verbose
 # --help
 if ( $opts{'help'} || !$opts{'path'} )
 {   
-    printf STDERR ("Syntax: %s [-h|-v]\n", $0);
+    printf STDERR ("Syntax: %s [-h|-v] --path=<PATH>\n", $0);
     printf STDERR ("  -h, --help                           this help                              |\n");
     printf STDERR ("  -v, --verbose                        increase verbosity                     |\n");
     printf STDERR ("\n");
     printf STDERR ("Options :\n");
     printf STDERR ("------------\n");
-    printf STDERR ("  -p, --path  <PATH>                   path you want to analyze               |\n");
-    printf STDERR ("  -d, --dest  <PATH>                   path where you want to put the roms    |\n");
+    printf STDERR ("  -p, --path  <PATH>                   path you want to analyze               | /!\\ Mandatory\n");
+    printf STDERR ("  -d, --dest  <PATH>                   path where you want to put the roms    | /!\\ Mandatory\n");
     exit 0;
 }
 
@@ -52,6 +52,11 @@ if ( ! -d $opts{'dest'} ) { print "ERROR: $opts{'dest'} is not a valid path\n";e
 if ( -d $opts{'path'})
 {
     @files  = <$opts{'path'}/*>;
+}
+else
+{
+    print "ERROR: $opts{'path'} is not a valid path\n";
+    exit 1;
 }
 
 foreach my $file ( @files )
