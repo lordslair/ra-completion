@@ -48,7 +48,7 @@ sub findFiles
 
         verbose (" $fileCount \t: $dir");
 
-        if ( $fileCount > $opts{'min'} )
+        if ( $fileCount > $min )
         {
 	    # If the number of files in the selected subpath > $opts{'min'} we
 	    # store the information in %RESULT for later use
@@ -90,8 +90,8 @@ if ( $opts{'help'} || !$opts{'path'} )
     exit 0;
 }
 
-verbose ("We received --path = $opts{'path'}");
-verbose ("We received --min  = $opts{'min'}");
+if ( $opts{'path'} ) { verbose ("We received --path = $opts{'path'}") }
+if ( $opts{'min'}  ) { verbose ("We received --min  = $opts{'min'}") }
 
 findDirs($opts{'path'});
 
