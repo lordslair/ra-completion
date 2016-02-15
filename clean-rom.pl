@@ -51,7 +51,7 @@ if ( ! -d $opts{'dest'} ) { print "ERROR: $opts{'dest'} is not a valid path\n";e
 # We list files in path
 if ( -d $opts{'path'})
 {
-    @files  = <$opts{'path'}/*>;
+    @files  = <"$opts{'path'}"/*>;
 }
 else
 {
