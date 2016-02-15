@@ -87,7 +87,7 @@ foreach my $game ( sort keys %Games )
     foreach my $zone ( sort keys %{$Games{$game}} )
     {
         my @codes = ( sort keys %{$Games{$game}{$zone}} );
-        if ( grep { /(^!$)|(^RAW$)|(^M$)/ } @codes )
+        if ( grep { /(^!$)|(^RAW$)|(^M$)|(^c\d?$)|(^b\d?$)|(^h\d?$)|(^x$)|(a\d?$)|(^hI$)|(^p\d?$)/ } @codes )
         {
             verbose ("FOUND: $game valid  GOOD DUMP for $zone");
             $found++;
