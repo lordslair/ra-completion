@@ -1,0 +1,72 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+use Term::ANSIColor;
+use Data::Dumper;
+use Getopt::Long;
+
+#
+# Variables initialization
+#
+my %opts     = ();
+my @iptables = ();
+
+GetOptions( \%opts,
+            "verbose|v",
+            "help|h",
+          );
+
+# Mini-verbose sub
+sub verbose
+{   
+    if ($opts{'verbose'})
+    {   
+        my $text2verb = join(' ', @_);print "[ ".$text2verb."\n";
+    }
+}
+
+# --help
+if ( $opts{'help'} )
+{   
+    printf STDERR ("Syntax: %s [-h|-v]\n", $0);
+    printf STDERR ("  -h, --help                           this help                              |\n");
+    printf STDERR ("  -v, --verbose                        increase verbosity                     |\n");
+    exit 0;
+}
+
+# check for iptables present on this system
+if ( ! -f '/sbin/iptables' ) { print "Couldn't find iptables binary. Exiting ...\n" && exit 1 }
+
+open IPTABLES, "/sbin/iptables -L -vn --line-numbers |" or die "Couldn't execute program: $!";
+    while ( defined( my $line = <IPTABLES> ) )
+    {   
+        chomp($line);
+        push @iptables, $line;
+    }
+close IPTABLES;
+
+foreach my $line (@iptables)
+{   
+    my $accept = colored("ACCEPT", 'white bold on_green');
+    my $drop   = colored("DROP", 'white bold on_red');
+
+    $line =~ s/ACCEPT/$accept/g;
+    $line =~ s/DROP/$drop/g;
+
+    # Comment detection
+    if ( $line =~ /\/[*] (.*) [*]\// )
+    {   
+        my $comment = colored($1, 'bold green');
+        $line =~ s/\/[*] (.*) [*]\//\t\t\t$comment/g;
+    }
+
+    # Protocol detection
+    if ( $line =~ /(tcp|udp)/ )
+    {   
+        my $protocol = colored($1, 'bold cyan');
+        $line =~ s/(tcp|udp)/$protocol/g;
+    }
+
+    print $line."\n";
+}
