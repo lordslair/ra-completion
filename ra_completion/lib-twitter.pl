@@ -130,6 +130,9 @@ foreach my $user ( sort keys %DM )
             if ($response->is_success)
             {
                 my $headers = $response->headers();
+                verbose ("User is registered on RA, sending ACK ... $user");
+                my $message_ack = "You're now registered\nI've now associated \@$user and RetroAchievement account $RA{$user}{'login'}";
+                my $ack     = $twitter->new_direct_message({ user => $user, text => $message_ack });
             }
             else
             {
