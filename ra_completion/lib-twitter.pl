@@ -2,12 +2,16 @@
 use strict;
 use warnings;
 
-use Term::ANSIColor;
 use Data::Dumper;
 use Getopt::Long;
-use Net::Twitter::Lite::WithAPIv1_1;
 use YAML::Tiny;
-use LWP;
+use JSON;
+
+use lib './lib';
+use RAB::Sprites;
+use RAB::RAAPI;
+use RAB::Twitter;
+use RAB::SQLite;
 
 binmode(STDOUT, ":utf8");
 
@@ -15,8 +19,7 @@ binmode(STDOUT, ":utf8");
 # Variables initialization
 #
 my %opts;
-my %DM;
-my %RA;
+my $logfile = './lib-twitter.log';
 my $twitterfile;
 my $rafile;
 
@@ -33,6 +36,35 @@ sub verbose
     if ($opts{'verbose'})
     {   
         my $text2verb = join(' ', @_);print "[ ".$text2verb."\n";
+    }
+}
+
+# Mini-log sub
+sub plog
+{
+    my $msg       = shift;
+    my @lt        = localtime;
+    my $msgprefix = '|';
+    # Format current datetime sensibly:
+    my $dt = sprintf("%d-%02d-%02d %02d:%02d:%02d",
+                     $lt[5]+1900,$lt[4]+1,
+                     $lt[3],$lt[2],$lt[1],$lt[0]);
+
+    unless (open(F,">>$logfile"))
+    {
+        warn "$dt $0: sub plog: Failed to open logfile ($logfile) for write.\n";
+    }
+    else
+    {
+        if ( $msg )
+        {
+            print F "$dt $msgprefix $msg\n";
+        }
+        else
+        {
+            warn "$dt $0: sub plog: No message!\n";
+        }
+        close F;
     }
 }
 
@@ -73,73 +105,155 @@ else
     exit 2;
 }
 
-my $twittyaml = YAML::Tiny->read( $twitterfile );
-print Dumper $twittyaml;
+#$dbh->do("CREATE TABLE Users(Id INT PRIMARY KEY, user_twitter TEXT, user_ra TEXT, ack TEXT, help TEXT)");
 
-my $rayaml = YAML::Tiny->read( $rafile );
-print Dumper $rayaml;
+my @twitter_users = RAB::SQLite::GetTwitterUsers;
 
-my $twitter = Net::Twitter::Lite::WithAPIv1_1->new(
-    access_token_secret => $twittyaml->[0]{AccessTokenSecret},
-    consumer_secret     => $twittyaml->[0]{ConsumerSecret},
-    access_token        => $twittyaml->[0]{AccessToken},
-    consumer_key        => $twittyaml->[0]{ConsumerKey},
-    user_agent          => 'RA Completion Bot',
-    ssl => 1,
-);
-
-my $lastmsg = $twitter->direct_messages({ count => 1 });
-my $lasmsg_id = ${$lastmsg}[0]->{id};
-
-while ( )
+my $sth;
+verbose ("-> RAB::Twitter::Statuses");
+my $DM = RAB::Twitter::Statuses;
+foreach my $user ( sort keys %{$DM} )
 {
+    verbose ("User $user");
 
-    my $statuses = $twitter->direct_messages({ max_id => $lasmsg_id, count => 20 });
-    for my $status ( @$statuses )
+    my $id = (reverse sort keys %{$DM->{$user}->{'dm'}})[0];
+    verbose ("\tDM($id): $DM->{$user}->{'dm'}->{$id}->{'text'}");
+
+    if ( $DM->{$user}->{'dm'}->{$id}->{'text'} =~ /^REGISTER\s?(\w*)/ )
     {
 
-        $DM{$status->{sender}{screen_name}}{'dm'}{$status->{id}}{'created_at'} = $status->{created_at};
-        $DM{$status->{sender}{screen_name}}{'dm'}{$status->{id}}{'text'}       = $status->{text};
-
-        $lasmsg_id = $status->{id} - 1;
-    }
-    if ( scalar(@$statuses) != 20 ) { last }
-}
-
-verbose ("No more Twitter API accesses beyond this point");
-
-foreach my $user ( sort keys %DM )
-{
-    foreach my $id ( sort keys %{$DM{$user}{'dm'}} )
-    {
-        if ( $DM{$user}{'dm'}{$id}{'text'} =~ /^ra\s?:\s?(\w*)/ )
+        if (! grep( /^$user$/, @twitter_users ))
         {
-            $RA{$user}{'login'} = $1;
+            RAB::SQLite::CreateTwitterUser($DM->{$user}->{'id'},$user,'');
+            verbose ("\tAdded in DB ($DM->{$user}->{'id'},$user)");
+        }
+        else
+        {
+            verbose ("\tAlready in DB ($DM->{$user}->{'id'},$user)");
+        }
 
-            my $browser = new LWP::UserAgent;
-            my $request = new HTTP::Request( GET => "http://retroachievements.org/API/API_GetUserRankAndScore.php?z=$rayaml->[0]{ra_user}&y=$rayaml->[0]{ra_api_key}&u=$RA{$user}{'login'}" );
-            my $headers = $request->headers();
-               $headers->header( 'User-Agent','Mozilla/5.0 (compatible; Konqueror/3.4; Linux) KHTML/3.4.2 (like Gecko)');
-               $headers->header( 'Accept', 'text/html, image/jpeg, image/png, text/*, image/*, */*');
-               $headers->header( 'Accept-Encoding','x-gzip, x-deflate, gzip, deflate');
-               $headers->header( 'Accept-Charset', 'iso-8859-15, utf-8;q=0.5, *;q=0.5');
-               $headers->header( 'Accept-Language', 'fr, en');
-               $headers->header( 'Referer', 'http://retroachievements.org/API');
-            my $response = $browser->request($request);
+        my $ack = RAB::SQLite::GetAck($user);
 
-            if ($response->is_success)
+        if ( $ack ne 'yes' )
+        {
+            my $user_ra = $1;
+            verbose ("\t-> RAB::RAAPI::GetUserRankAndScore($rafile,$user_ra)");
+            my $return = RAB::RAAPI::GetUserRankAndScore($rafile,$user_ra);
+
+            if ($return)
             {
-                my $headers = $response->headers();
-                verbose ("User is registered on RA, sending ACK ... $user");
-                my $message_ack = "You're now registered\nI've now associated \@$user and RetroAchievement account $RA{$user}{'login'}";
-                my $ack     = $twitter->new_direct_message({ user => $user, text => $message_ack });
+                if ( $return eq '{"Score":0,"Rank":"1"}' )
+                {
+                    verbose ("\tNot registered on RA, or shit happened");
+                    RAB::Twitter::SendDM($user, "I couldn't find your username '$user_ra' on RA.org\nCheck it out, and come back to me.");
+                }
+                else
+                { 
+                    verbose ("\tRegistered on RA ($user), sending ACK");
+                    RAB::Twitter::SendDM($user, "You're now registered\nI've associated \@$user and RetroAchievement account $user_ra");
+
+                    verbose ("\t-> RAB::SQLite::AddRAUser($user,$user_ra)");
+                    RAB::SQLite::AddRAUser($user,$user_ra);
+                }
             }
-            else
+            else    
             {
-                print "Erreur:".$response->status_line."\n";  
+                print "Erreur: No answer from RA API\n";
             }
         }
+        else
+        {
+            verbose ("\tAlready got acknowledged (\$ack = $ack), so no DM sent");
+        }
     }
+    elsif ($DM->{$user}->{'dm'}->{$id}->{'text'} =~ /^DELETE/ )
+    {
+        verbose ("\tDelete requested");
+        my $ret = RAB::SQLite::GetTwitterUserIfExist($user);
+
+        if ( $ret eq $user )
+        {   
+            verbose ("\t->RAB::SQLite::DeleteUser($user)");
+            RAB::SQLite::DeleteUser($user);
+            RAB::Twitter::SendDM($user, "Request acknowledged.\nYou're cleaned from our databases now.");
+        }
+        else
+        {
+            verbose ("\tUser $user does not exists in DB. I did nothing.");
+        }
+    }
+    elsif (( $DM->{$user}->{'dm'}->{$id}->{'text'} =~ /^HELP/ ) || ( $DM->{$user}->{'dm'}->{$id}->{'text'} !~ /(^HELP)|(^DELETE)|(^REGISTER\s?(\w*))/ ))
+    {
+        verbose ("\tHelp requested, we got '$DM->{$user}->{'dm'}->{$id}->{'text'}'");
+        my $db_help = RAB::SQLite::GetHelp($user);
+
+        if ( ! $db_help )
+        {
+            verbose ("\tSending HELP to new user");
+            RAB::Twitter::SendDM($user, "Welcome to the HELP engine.\nAvailable DM requests:\n\nREGISTER <username> (ex REGISTER lordslair)\nDELETE (Clean from database)\n\nThis message will be sent only once.");
+            RAB::SQLite::CreateTwitterUser($DM->{$user}->{'id'},$user,'DONE');
+        }   
+        elsif ( $db_help ne 'DONE' )
+        {
+            verbose ("\tSending HELP");
+            RAB::Twitter::SendDM($user, "Welcome to the HELP engine.\nAvailable DM requests:\n\nREGISTER <username> (ex REGISTER lordslair)\nDELETE (Clean from database)\n\nThis message will be sent only once.");
+            RAB::SQLite::SetAck($user);
+        }   
+        else
+        {
+            verbose ("\tHelp already send. I did nothing.");
+        }   
+    }
+
 }
 
-print Dumper %RA;
+verbose ("We're done with twitter requests");
+
+# Now we're looping only on followers and registered users
+# To fetch data from RA on them
+
+while(my $row = RAB::SQLite::GetRegisteredUsers())
+{
+    verbose ("\t-> RAB::RAAPI::GetUserRecentlyPlayedGames($rafile,$row->{user_ra})");
+    my $return = RAB::RAAPI::GetUserRecentlyPlayedGames($rafile,$row->{user_ra});
+
+    if ($return)
+    {
+        verbose ("\tList of recent achievements received");
+        my $JSON = decode_json($return);
+        my $max = scalar @{$JSON}; # Because I'm not sure I'll receive 10 last played games
+        for (my $i = 0; $i < $max; $i++) # And we loop
+        {
+            #verbose ( "\t$JSON->[$i]->{NumAchieved}/$JSON->[$i]->{NumPossibleAchievements} for game $JSON->[$i]->{GameID} ($JSON->[$i]->{ImageIcon})" );
+            if ( $JSON->[$i]->{ScoreAchieved} > 0 )
+            {
+                if ( $JSON->[$i]->{NumAchieved} == $JSON->[$i]->{NumPossibleAchievements} )
+                {
+                    my $gamePercent = sprintf("%.0f", 100*$JSON->[$i]->{NumAchieved}/$JSON->[$i]->{NumPossibleAchievements});
+
+                    verbose ( "\t\t-> RAB::Sprites::fetch($JSON->[$i]->{ImageIcon})");
+                    RAB::Sprites::fetch($JSON->[$i]->{ImageIcon});
+
+                    verbose ( "\t\t-> RAB::Sprites::create($JSON->[$i]->{GameID}, $JSON->[$i]->{ImageIcon}, $gamePercent)");
+                    RAB::Sprites::create($JSON->[$i]->{GameID}, $JSON->[$i]->{ImageIcon}, $gamePercent);
+
+                    verbose ( "\t\tSending tweet about this");
+
+                    my $kudos  = "\@$row->{user_twitter} Kudos, ";
+                       $kudos .= "with $JSON->[$i]->{NumAchieved}/$JSON->[$i]->{NumPossibleAchievements} Achievements unlocked, ";
+                       $kudos .= "you completed $JSON->[$i]->{Title} ($JSON->[$i]->{ConsoleName}) !";
+
+                    verbose ( "\t\t\t-> RAB::Twitter::FormatTweet($kudos)" );
+                    my $tweet = RAB::Twitter::FormatTweet($kudos);
+
+                    verbose ( "\t\t\t-> RAB::Twitter::SendTweetMedia(\"$tweet","/var/www/html/$JSON->[$i]->{GameID}.png\")" );
+                    RAB::Twitter::SendTweetMedia($tweet,"/var/www/html/$JSON->[$i]->{GameID}.png");
+                }
+                else
+                {
+                    verbose ( "\t\t$JSON->[$i]->{NumAchieved}/$JSON->[$i]->{NumPossibleAchievements} for game $JSON->[$i]->{GameID} ($JSON->[$i]->{ImageIcon}) = Not enough progress" );
+                } 
+            }
+        }       
+    }
+}
