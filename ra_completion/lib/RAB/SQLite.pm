@@ -9,6 +9,8 @@ my $dbh = DBI->connect(
     { RaiseError => 1 },
 ) or die $DBI::errstr;
 
+#$dbh->do("CREATE TABLE Users(Id INT PRIMARY KEY, user_twitter TEXT, user_ra TEXT, ack TEXT, help TEXT, done_normal TEXT, done_hardcore TEXT)");
+
 sub GetTwitterUsers
 {
     my $sth = $dbh->prepare( "SELECT user_twitter FROM Users;" );
@@ -24,7 +26,7 @@ sub CreateTwitterUser
     my $id   = shift;
     my $user = shift;
     my $help = shift;
-    my $sth  = $dbh->prepare( "INSERT INTO Users VALUES('$id','$user','','','$help');");
+    my $sth  = $dbh->prepare( "INSERT INTO Users VALUES('$id','$user','','','$help','','');");
     $sth->execute();
     $sth->finish();
 }
@@ -85,10 +87,51 @@ sub GetTwitterUserIfExist
 
 sub GetRegisteredUsers
 {
-    $sth = $dbh->prepare( "SELECT user_twitter,user_ra FROM Users WHERE ack='yes';");
+    $sth = $dbh->prepare( "SELECT Id,user_twitter,user_ra FROM Users WHERE ack='yes';");
     $sth->execute();
 
-    return $sth->fetchrow_hashref();
+    while(my $row = $sth->fetchrow_hashref())
+    {
+        $USERS{$row->{Id}}{'user_twitter'} = $row->{user_twitter};
+        $USERS{$row->{Id}}{'user_ra'}      = $row->{user_ra};
+    }
+    return \%USERS;
+}
+
+sub SetGameAsDone
+{
+    my $user = shift;
+    my $id   = shift;
+    my $mode = shift;
+
+    if ( $mode eq 'normal' or $mode eq 'hardcore' )
+    {
+        my $sth = $dbh->prepare( "SELECT done_$mode FROM Users WHERE user_twitter='$user';");
+           $sth->execute();
+        my $done  = $sth->fetchrow();
+           $sth->finish();
+
+        my @done_games = split /,/, $done;
+
+        if (my ($matched) = grep $_ eq $id, @done_games)
+        {
+            # No action if game is already into done games
+            return 'already_in_db';
+        }
+        else
+        {
+            if ( $done eq '' )
+            {
+                $dbh->do("UPDATE Users SET done_$mode='$id' WHERE user_twitter='$user'");
+            }
+            else
+            {
+                $done .= ",$id";
+                $dbh->do("UPDATE Users SET done_$mode='$done' WHERE user_twitter='$user'");
+            }
+            return 'added_in_db';
+        }
+    }
 }
 
 1;
