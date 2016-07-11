@@ -121,6 +121,7 @@ foreach my $user ( sort keys %{$DM} )
 
         if (! grep( /^$user$/, @twitter_users ))
         {
+            plog ( "REGISTER $user");
             RAB::SQLite::CreateTwitterUser($DM->{$user}->{'id'},$user,'');
             verbose ("\tAdded in DB ($DM->{$user}->{'id'},$user)");
         }
@@ -168,10 +169,11 @@ foreach my $user ( sort keys %{$DM} )
         verbose ("\tDelete requested");
         my $ret = RAB::SQLite::GetTwitterUserIfExist($user);
 
-        if ( $ret eq $user )
+        if ( ($ret) && ($ret eq $user) )
         {   
             verbose ("\t->RAB::SQLite::DeleteUser($user)");
             RAB::SQLite::DeleteUser($user);
+            plog ( "DELETE $user");
             RAB::Twitter::SendDM($user, "Request acknowledged.\nYou're cleaned from our databases now.");
         }
         else
@@ -237,6 +239,8 @@ foreach my $user_id ( keys %{$USERS} )
                     }
                     else
                     {
+                        plog ( "STORE $USERS->{$user_id}{'user_twitter'}:$JSON->[$i]->{GameID}");
+
                         my $gamePercent = sprintf("%.0f", 100*$JSON->[$i]->{NumAchieved}/$JSON->[$i]->{NumPossibleAchievements});
 
                         verbose ( "\t\t-> RAB::Sprites::fetch($JSON->[$i]->{ImageIcon})");
