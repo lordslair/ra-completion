@@ -222,51 +222,60 @@ foreach my $user_id ( keys %{$USERS} )
     {
         verbose ("\tList of recent achievements received");
         my $JSON = decode_json($return);
+        my %X;
+        my @csv;
+
         my $max = scalar @{$JSON}; # Because I'm not sure I'll receive 10 last played games
         for (my $i = 0; $i < $max; $i++) # And we loop
         {
-            if ( $JSON->[$i]->{ScoreAchieved} > 0 )
-            {
-                if ( $JSON->[$i]->{NumAchieved} < $JSON->[$i]->{NumPossibleAchievements} )
-                {
-                    verbose ( "\t\tMarking this game ($JSON->[$i]->{GameID}:$JSON->[$i]->{Title}) as DONE in DB");
-                    verbose ( "\t\t-> RAB::SQLite::SetGameAsDone($USERS->{$user_id}{'user_twitter'},$JSON->[$i]->{GameID},'normal')" );
-                    my $done = RAB::SQLite::SetGameAsDone($USERS->{$user_id}{'user_twitter'},$JSON->[$i]->{GameID},'normal');
+            push @csv, $JSON->[$i]->{GameID};
+            $X{$JSON->[$i]->{GameID}} = $i;
+        }       
+
+        verbose ("\t-> RAB::RAAPI::GetUserProgress($rafile,$USERS->{$user_id}{'user_ra'},@csv)");
+        my $retprogress = RAB::RAAPI::GetUserProgress($rafile,$USERS->{$user_id}{'user_ra'},\@csv);
+
+        foreach my $id ( keys %{$retprogress} )
+        {
+            if ( $retprogress->{$id}->{ScoreAchieved} > 0 )
+            {   
+                if ( $retprogress->{$id}->{NumAchieved} < $retprogress->{$id}->{NumPossibleAchievements} )
+                {   
+                    verbose ( "\t\tMarking this game ($id:$JSON->[$X{$id}]->{Title}) as DONE in DB");
+                    verbose ( "\t\t-> RAB::SQLite::SetGameAsDone($USERS->{$user_id}{'user_twitter'},$JSON->[$X{$id}]->{GameID},'normal')" );
+                    my $done = RAB::SQLite::SetGameAsDone($USERS->{$user_id}{'user_twitter'},$JSON->[$X{$id}]->{GameID},'normal');
 
                     if ( $done eq 'already_in_db')
-                    {
+                    {   
                         verbose ( "\t\t\tAlready in DB, doing nothing." );
                     }
                     else
                     {
-                        plog ( "STORE $USERS->{$user_id}{'user_twitter'}:$JSON->[$i]->{GameID}");
+                        plog ( "STORE $USERS->{$user_id}{'user_twitter'}:$JSON->[$X{$id}]->{GameID}");
 
-                        my $gamePercent = sprintf("%.0f", 100*$JSON->[$i]->{NumAchieved}/$JSON->[$i]->{NumPossibleAchievements});
-
-                        verbose ( "\t\t-> RAB::Sprites::fetch($JSON->[$i]->{ImageIcon})");
-                        RAB::Sprites::fetch($JSON->[$i]->{ImageIcon});
-
-                        verbose ( "\t\t-> RAB::Sprites::create($JSON->[$i]->{GameID}, $JSON->[$i]->{ImageIcon}, $gamePercent)");
-                        RAB::Sprites::create($JSON->[$i]->{GameID}, $JSON->[$i]->{ImageIcon}, $gamePercent);
+                        my $gamePercent = sprintf("%.0f", 100*$JSON->[$X{$id}]->{NumAchieved}/$JSON->[$X{$id}]->{NumPossibleAchievements});
+                        verbose ( "\t\t-> RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon})");
+                        RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon});
+                        verbose ( "\t\t-> RAB::Sprites::create($JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent)");
+                        RAB::Sprites::create($JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent);
 
                         verbose ( "\t\tSending tweet about this");
-
                         my $kudos  = "\@$USERS->{$user_id}{'user_twitter'} Kudos, ";
-                           $kudos .= "with $JSON->[$i]->{NumAchieved}/$JSON->[$i]->{NumPossibleAchievements} Achievements unlocked, ";
-                           $kudos .= "you completed $JSON->[$i]->{Title} ($JSON->[$i]->{ConsoleName})[$JSON->[$i]->{GameID}] !";
+                           $kudos .= "with $JSON->[$X{$id}]->{NumAchieved}/$JSON->[$X{$id}]->{NumPossibleAchievements} Achievements unlocked, ";
+                           $kudos .= "you completed $JSON->[$X{$id}]->{Title} ($JSON->[$X{$id}]->{ConsoleName})[$JSON->[$X{$id}]->{GameID}] !";
 
                         verbose ( "\t\t\t-> RAB::Twitter::FormatTweet($kudos)" );
                         my $tweet = RAB::Twitter::FormatTweet($kudos);
 
-                        verbose ( "\t\t\t-> RAB::Twitter::SendTweetMedia(\"$tweet","/var/www/html/$JSON->[$i]->{GameID}.png\")" );
-                        RAB::Twitter::SendTweetMedia($tweet,"/var/www/html/$JSON->[$i]->{GameID}.png");
+                        verbose ( "\t\t\t-> RAB::Twitter::SendTweetMedia(\"$tweet","/var/www/html/$JSON->[$X{$id}]->{GameID}.png\")" );
+                        RAB::Twitter::SendTweetMedia($tweet,"/var/www/html/$JSON->[$X{$id}]->{GameID}.png");
                     }
                 }
                 else
-                {
-                    verbose ( "\t\t$JSON->[$i]->{NumAchieved}/$JSON->[$i]->{NumPossibleAchievements} for game $JSON->[$i]->{GameID} ($JSON->[$i]->{ImageIcon}) = Not enough progress" );
-                } 
+                {   
+                    verbose ( "\t\t$retprogress->{$id}->{NumAchieved}/$retprogress->{$id}->{NumPossibleAchievements} for game $JSON->[$id]->{GameID} ($JSON->[$id]->{ImageIcon}) = Not enough progress" );
+                }
             }
-        }       
+        }
     }
 }
