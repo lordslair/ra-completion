@@ -77,16 +77,6 @@ sub GetUserProgress
     if ($response->is_success)
     {   
         return decode_json($response->content);
-
-#        foreach my $id ( keys %{$JSON} )
-#        {
-#            print STDERR Dumper $JSON->{$id};
-#            foreach my $label ( keys %{$JSON->{$id}} )
-#            {
-#                $NEWJSON{$id}{$label} = $JSON->{$id}->{$label}
-#            }
-#        }
-#        print STDERR Dumper %NEWJSON;
     }
     else
     {
