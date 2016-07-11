@@ -237,9 +237,15 @@ foreach my $user_id ( keys %{$USERS} )
 
         foreach my $id ( keys %{$retprogress} )
         {
-            if ( $retprogress->{$id}->{ScoreAchieved} > 0 )
+            if ( $retprogress->{$id}->{ScoreAchievedHardcore} > 0 )
             {   
-                if ( $retprogress->{$id}->{NumAchieved} < $retprogress->{$id}->{NumPossibleAchievements} )
+                if ( $retprogress->{$id}->{NumAchievedHardcore} < $retprogress->{$id}->{NumPossibleAchievements} )
+                {
+                }
+            }
+            elsif ( $retprogress->{$id}->{ScoreAchieved} > 0 )
+            {   
+                if ( $retprogress->{$id}->{NumAchievedHardcore} < $retprogress->{$id}->{NumPossibleAchievements} )
                 {   
                     verbose ( "\t\tMarking this game ($id:$JSON->[$X{$id}]->{Title}) as DONE in DB");
                     verbose ( "\t\t-> RAB::SQLite::SetGameAsDone($USERS->{$user_id}{'user_twitter'},$JSON->[$X{$id}]->{GameID},'normal')" );
