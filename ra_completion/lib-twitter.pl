@@ -4,10 +4,10 @@ use warnings;
 
 use Data::Dumper;
 use Getopt::Long;
-use YAML::Tiny;
-use JSON;
 
 use lib './lib';
+use YAML::Tiny;
+use JSON;
 use RAB::Sprites;
 use RAB::RAAPI;
 use RAB::Twitter;
