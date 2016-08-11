@@ -30,6 +30,9 @@ sub create
     my $imageId     = $imageIcon;
        $imageId     =~ s/.png//;
     my $gamePercent = shift;
+    my $type        = shift;
+    my $score       = shift;
+    my $nbrachieve  = shift;
     my $image       = "$tmpfolder/$imageIcon";
 
         my $gameImage = Image::Magick->new;
@@ -123,8 +126,89 @@ sub create
         $bar->read("$spritesfolder/base-bar.png");
         $big->Composite( image => $bar, qw (compose SrcAtop geometry center));
 
-        $big->Write( "$finalfolder/$gameId.png" );
+        if ( $type eq 'hardcore' )
+        {
+            my $hardcore = Image::Magick->new;
+            $hardcore->read("$spritesfolder/bar-hardcore.png");
+            $big->Composite( image => $hardcore, qw (compose SrcAtop geometry center));
+        }
 
+        my $scorebg = Image::Magick->new;
+        $scorebg->read("$spritesfolder/base-score.png");
+        $big->Composite( image => $scorebg, qw (compose SrcAtop geometry center));
+
+        if ( $score =~ /^(\d)(\d)(\d)$/ )
+        {   
+            print "$1XX $2X $3\n";
+            my $nbr1 = Image::Magick->new;
+            $nbr1->Read("$spritesfolder/digit-$1.png");
+
+            my $nbr2 = Image::Magick->new;
+            $nbr2->Read("$spritesfolder/digit-$2.png");
+
+            my $nbr3 = Image::Magick->new;
+            $nbr3->Read("$spritesfolder/digit-$3.png");
+
+            $big->Composite( image => $nbr1, qw (compose SrcAtop geometry +64-66));
+            $big->Composite( image => $nbr2, qw (compose SrcAtop geometry +73-66));
+            $big->Composite( image => $nbr3, qw (compose SrcAtop geometry +82-66));
+        }
+        if ( $score =~ /^(\d)(\d)$/ )
+        {
+            print "$1X $2\n";
+            my $nbr1 = Image::Magick->new;
+            $nbr1->Read("$spritesfolder/digit-$1.png");
+
+            my $nbr2 = Image::Magick->new;
+            $nbr2->Read("$spritesfolder/digit-$2.png");
+
+            $big->Composite( image => $nbr1, qw (compose SrcAtop geometry +73-66));
+            $big->Composite( image => $nbr2, qw (compose SrcAtop geometry +82-66));
+        }
+        elsif ( $score =~ /^(\d)$/ )
+        {
+            print "$1\n";
+            my $nbr1 = Image::Magick->new;
+            $nbr1->Read("$spritesfolder/digit-$1.png");
+
+            $big->Composite( image => $nbr1, qw (compose SrcAtop geometry +82-66));
+        }
+
+        if ( $nbrachieve =~ /^(\d)(\d)(\d)$/ )
+        {   
+            my $nbr1 = Image::Magick->new;
+            $nbr1->Read("$spritesfolder/digit-$1.png");
+
+            my $nbr2 = Image::Magick->new;
+            $nbr2->Read("$spritesfolder/digit-$2.png");
+
+            my $nbr3 = Image::Magick->new;
+            $nbr3->Read("$spritesfolder/digit-$3.png");
+
+            $big->Composite( image => $nbr1, qw (compose SrcAtop geometry +64-52));
+            $big->Composite( image => $nbr2, qw (compose SrcAtop geometry +73-52));
+            $big->Composite( image => $nbr3, qw (compose SrcAtop geometry +82-52));
+        }
+        if ( $nbrachieve =~ /^(\d)(\d)$/ )
+        {   
+            my $nbr1 = Image::Magick->new;
+            $nbr1->Read("$spritesfolder/digit-$1.png");
+
+            my $nbr2 = Image::Magick->new;
+            $nbr2->Read("$spritesfolder/digit-$2.png");
+
+            $big->Composite( image => $nbr1, qw (compose SrcAtop geometry +73-52));
+            $big->Composite( image => $nbr2, qw (compose SrcAtop geometry +82-52));
+        }
+        elsif ( $nbrachieve =~ /^(\d)$/ )
+        {   
+            my $nbr1 = Image::Magick->new;
+            $nbr1->Read("$spritesfolder/digit-$1.png");
+
+            $big->Composite( image => $nbr1, qw (compose SrcAtop geometry +82-52));
+        }
+
+        $big->Write( "$finalfolder/$gameId.png" );
 }
 
 1;
