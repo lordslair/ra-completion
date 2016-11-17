@@ -82,7 +82,6 @@ sub create
         }
         elsif ( $gamePercent =~ /^(\d)(\d)(\d)$/ )
         {
-            verbose ( "\$1XX $1XX - \$2X $2X - \$3 $3" );
             my $nbr1 = Image::Magick->new;
             $nbr1->Read("$spritesfolder/digit-$1XX.png");
 
@@ -139,7 +138,6 @@ sub create
 
         if ( $score =~ /^(\d)(\d)(\d)$/ )
         {   
-            print "$1XX $2X $3\n";
             my $nbr1 = Image::Magick->new;
             $nbr1->Read("$spritesfolder/digit-$1.png");
 
@@ -155,7 +153,6 @@ sub create
         }
         if ( $score =~ /^(\d)(\d)$/ )
         {
-            print "$1X $2\n";
             my $nbr1 = Image::Magick->new;
             $nbr1->Read("$spritesfolder/digit-$1.png");
 
@@ -167,7 +164,6 @@ sub create
         }
         elsif ( $score =~ /^(\d)$/ )
         {
-            print "$1\n";
             my $nbr1 = Image::Magick->new;
             $nbr1->Read("$spritesfolder/digit-$1.png");
 
