@@ -10,6 +10,9 @@ my $tmpfolder     = './tmp';
 my $finalfolder   = './img';
 my $spritesfolder = './lib/RAB/Sprites';
 
+if ( ! -d "$tmpfolder"   ) { mkdir "$tmpfolder"   }
+if ( ! -d "$finalfolder" ) { mkdir "$finalfolder" }
+
 sub fetch
 {   
     my $imageIcon   = shift;
@@ -35,6 +38,8 @@ sub create
     my $score       = shift;
     my $nbrachieve  = shift;
     my $image       = "$tmpfolder/$imageIcon";
+
+    if ( ! -d "$finalfolder/$user" ) { mkdir "$finalfolder/$user" }
 
         my $gameImage = Image::Magick->new;
         $gameImage->read($image);
