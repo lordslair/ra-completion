@@ -263,7 +263,7 @@ foreach my $user_id ( keys %{$USERS} )
                         verbose ( "\t\t-> RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon})");
                         RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon});
                         verbose ( "\t\t-> RAB::Sprites::create($JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, 'normal', $JSON->[$X{$id}]->{ScoreAchieved}, $JSON->[$X{$id}]->{NumPossibleAchievements})");
-                        RAB::Sprites::create($JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, 'normal', $JSON->[$X{$id}]->{ScoreAchieved}, $JSON->[$X{$id}]->{NumPossibleAchievements});
+                        RAB::Sprites::create($USERS->{$user_id}{'user_twitter'}, $JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, 'normal', $JSON->[$X{$id}]->{ScoreAchieved}, $JSON->[$X{$id}]->{NumPossibleAchievements});
 
                         if ( $JSON->[$X{$id}]->{NumAchieved} == $JSON->[$X{$id}]->{NumPossibleAchievements} )
                         {
@@ -275,9 +275,9 @@ foreach my $user_id ( keys %{$USERS} )
                             verbose ( "\t\t\t-> RAB::Twitter::FormatTweet($kudos)" );
                             my $tweet = RAB::Twitter::FormatTweet($kudos);
 
-                            verbose ( "\t\t\t-> RAB::Twitter::SendTweetMedia(\"$tweet","/var/www/html/$JSON->[$X{$id}]->{GameID}.png\")" );
+                            verbose ( "\t\t\t-> RAB::Twitter::SendTweetMedia(\"$tweet","img/$USERS->{$user_id}{'user_twitter'}/$JSON->[$X{$id}]->{GameID}.png\")" );
                             plog ( "TWEET $USERS->{$user_id}{'user_twitter'}:$JSON->[$X{$id}]->{GameID}");
-                            RAB::Twitter::SendTweetMedia($tweet,"/var/www/html/$JSON->[$X{$id}]->{GameID}.png");
+                            RAB::Twitter::SendTweetMedia($tweet,"img/$USERS->{$user_id}{'user_twitter'}/$JSON->[$X{$id}]->{GameID}.png");
                         }
                         else
                         {

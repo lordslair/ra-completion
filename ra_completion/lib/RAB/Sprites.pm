@@ -6,8 +6,8 @@ use Image::Magick;
 # Variables initialization
 #
 my $logfile       = './lib-twitter.log';
-my $tmpfolder     = '/var/www/html/tmp';
-my $finalfolder   = '/var/www/html';
+my $tmpfolder     = './tmp';
+my $finalfolder   = './img';
 my $spritesfolder = './lib/RAB/Sprites';
 
 sub fetch
@@ -24,6 +24,7 @@ sub fetch
 
 sub create
 {
+    my $user        = shift;
     my $gameId      = shift;
     my $imageIcon   = shift;
        $imageIcon   =~ s/\/Images\///;
@@ -204,7 +205,7 @@ sub create
             $big->Composite( image => $nbr1, qw (compose SrcAtop geometry +82-52));
         }
 
-        $big->Write( "$finalfolder/$gameId.png" );
+        $big->Write( "$finalfolder/$user/$gameId.png" );
 }
 
 1;
