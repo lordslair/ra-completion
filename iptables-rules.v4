@@ -1,0 +1,22 @@
+# Handcrafted with smile, and grabbed on https://github.com/lordslair
+*filter
+:INPUT DROP [3641:1641168]
+-A INPUT -i lo                                                                     -j ACCEPT
+
+-A INPUT -m state --state RELATED,ESTABLISHED  -j ACCEPT
+
+-A INPUT -p tcp --dport 22                     -m comment --comment "INPUT SSH"    -j ACCEPT
+-A INPUT -p tcp --dport 80                     -m comment --comment "INPUT HTTP"   -j ACCEPT
+-A INPUT -p tcp --dport 443                    -m comment --comment "INPUT HTTPS"  -j ACCEPT
+
+:FORWARD ACCEPT [0:0]
+:OUTPUT DROP [3078:641437]
+-A OUTPUT -o lo                                                                    -j ACCEPT
+
+-A OUTPUT -m state --state RELATED,ESTABLISHED                                     -j ACCEPT
+
+-A OUTPUT -p udp --dport 53                    -m comment --comment "OUTPUT DNS"   -j ACCEPT
+-A OUTPUT -p udp --dport 80                    -m comment --comment "OUTPUT HTTP"  -j ACCEPT
+-A OUTPUT -p udp --dport 123                   -m comment --comment "OUTPUT NTP"   -j ACCEPT
+-A OUTPUT -p udp --dport 443                   -m comment --comment "OUTPUT HTTPS" -j ACCEPT
+COMMIT
