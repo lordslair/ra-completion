@@ -5,7 +5,7 @@ use warnings;
 use DBI;
 
 my $dbh = DBI->connect(
-    "dbi:SQLite:dbname=ra_completion.db",
+    "dbi:SQLite:dbname=/home/ra_bot/ra_completion.db",
     "",
     "",
     { RaiseError => 1 },
