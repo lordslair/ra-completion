@@ -246,28 +246,30 @@ foreach my $user_id ( keys %{$USERS} )
             }
             elsif ( $retprogress->{$id}->{ScoreAchieved} > 0 )
             {   
+                verbose ( "\t== $id:$JSON->[$X{$id}]->{Title}");
                 if ( $retprogress->{$id}->{NumAchievedHardcore} < $retprogress->{$id}->{NumPossibleAchievements} )
-                {   
-                    verbose ( "\t\tMarking this game ($id:$JSON->[$X{$id}]->{Title}) as DONE in DB");
-                    verbose ( "\t\t-> RAB::SQLite::SetGameAsDone($USERS->{$user_id}{'user_twitter'},$JSON->[$X{$id}]->{GameID},'normal')" );
-                    my $done = RAB::SQLite::SetGameAsDone($USERS->{$user_id}{'user_twitter'},$JSON->[$X{$id}]->{GameID},'normal');
-
-                    if ( $done eq 'already_in_db')
-                    {   
-                        verbose ( "\t\t\tAlready in DB, doing nothing." );
-                    }
-                    else
+                {
+                    if ( $JSON->[$X{$id}]->{NumAchieved} == $JSON->[$X{$id}]->{NumPossibleAchievements} )
                     {
-                        plog ( "STORE $USERS->{$user_id}{'user_twitter'}:$JSON->[$X{$id}]->{GameID}");
 
-                        my $gamePercent = sprintf("%.0f", 100*$JSON->[$X{$id}]->{NumAchieved}/$JSON->[$X{$id}]->{NumPossibleAchievements});
-                        verbose ( "\t\t-> RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon})");
-                        RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon});
-                        verbose ( "\t\t-> RAB::Sprites::create($JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, 'normal', $JSON->[$X{$id}]->{ScoreAchieved}, $JSON->[$X{$id}]->{NumPossibleAchievements})");
-                        RAB::Sprites::create($USERS->{$user_id}{'user_twitter'}, $JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, 'normal', $JSON->[$X{$id}]->{ScoreAchieved}, $JSON->[$X{$id}]->{NumPossibleAchievements});
+                        verbose ( "\t\tMarking this game ($id:$JSON->[$X{$id}]->{Title}) as DONE in DB");
+                        verbose ( "\t\t-> RAB::SQLite::SetGameAsDone($USERS->{$user_id}{'user_twitter'},$JSON->[$X{$id}]->{GameID},'normal')" );
+                        my $done = RAB::SQLite::SetGameAsDone($USERS->{$user_id}{'user_twitter'},$JSON->[$X{$id}]->{GameID},'normal');
 
-                        if ( $JSON->[$X{$id}]->{NumAchieved} == $JSON->[$X{$id}]->{NumPossibleAchievements} )
+                        if ( $done eq 'already_in_db')
                         {
+                            verbose ( "\t\t\tAlready in DB, doing nothing." );
+                        }
+                        else
+                        {
+                            plog ( "STORE $USERS->{$user_id}{'user_twitter'}:$JSON->[$X{$id}]->{GameID}");
+
+                            my $gamePercent = sprintf("%.0f", 100*$JSON->[$X{$id}]->{NumAchieved}/$JSON->[$X{$id}]->{NumPossibleAchievements});
+                            verbose ( "\t\t-> RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon})");
+                            RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon});
+                            verbose ( "\t\t-> RAB::Sprites::create($JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, 'normal', $JSON->[$X{$id}]->{ScoreAchieved}, $JSON->[$X{$id}]->{NumPossibleAchievements})");
+                            RAB::Sprites::create($USERS->{$user_id}{'user_twitter'}, $JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, 'normal', $JSON->[$X{$id}]->{ScoreAchieved}, $JSON->[$X{$id}]->{NumPossibleAchievements});
+
                             verbose ( "\t\tSending tweet about this");
                             my $kudos  = "\@$USERS->{$user_id}{'user_twitter'} Kudos, ";
                                $kudos .= "with $JSON->[$X{$id}]->{NumAchieved}/$JSON->[$X{$id}]->{NumPossibleAchievements} Achievements unlocked, ";
@@ -280,10 +282,11 @@ foreach my $user_id ( keys %{$USERS} )
                             plog ( "TWEET $USERS->{$user_id}{'user_twitter'}:$JSON->[$X{$id}]->{GameID}");
                             RAB::Twitter::SendTweetMedia($tweet,"img/$USERS->{$user_id}{'user_twitter'}/$JSON->[$X{$id}]->{GameID}.png");
                         }
-                        else
-                        {
-                            verbose ( "\t\t\tGame not completed ($JSON->[$X{$id}]->{NumAchieved}/$JSON->[$X{$id}]->{NumPossibleAchievements}) => No tweet about it" );
-                        }
+
+                    }
+                    else
+                    {
+                        verbose ( "\t\tGame in progress but not completed ($JSON->[$X{$id}]->{NumAchieved}/$JSON->[$X{$id}]->{NumPossibleAchievements})\t=> No tweet" );
                     }
                 }
                 else
