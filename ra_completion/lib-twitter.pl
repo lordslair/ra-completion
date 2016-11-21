@@ -234,6 +234,7 @@ foreach my $user_id ( keys %{$USERS} )
 
         verbose ("\t-> RAB::RAAPI::GetUserProgress($rafile,$USERS->{$user_id}{'user_ra'},@csv)");
         my $retprogress = RAB::RAAPI::GetUserProgress($rafile,$USERS->{$user_id}{'user_ra'},\@csv);
+        verbose ("We're done with retroachievement.org API requests");
 
         foreach my $id ( keys %{$retprogress} )
         {
