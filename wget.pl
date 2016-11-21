@@ -5,8 +5,8 @@ use warnings;
 use LWP::Simple qw(getstore);
 use LWP::UserAgent;
 
-my $url      = 'https://github.com/lordslair/ra_bot/archive/master.zip';
-my $filename = 'master.zip';
+my $url      = $ARGV[0];
+my $filename = $ARGV[1];
 my $save     = "/tmp/$filename";
 
 my $ua = LWP::UserAgent->new();
