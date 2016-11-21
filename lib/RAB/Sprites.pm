@@ -20,8 +20,20 @@ sub fetch
     my $image       = "$tmpfolder/$imageIcon";
 
     if ( ! -f "$image" )
-    {   
-        `wget http://www.retroachievements.org/Images/$imageIcon -O $tmpfolder/$imageIcon`;
+    {
+        use LWP::Simple qw(getstore);
+        require LWP::UserAgent;
+
+        my $url      = "http://www.retroachievements.org/Images/$imageIcon";
+        my $save     = "$tmpfolder/$imageIcon";
+
+        my $ua = LWP::UserAgent->new();
+        my $response = $ua->get($url);
+        die $response->status_line if !$response->is_success;
+
+        my $file = $response->decoded_content( charset => 'none' );
+
+        getstore($url,$save);
     }
 }
 
