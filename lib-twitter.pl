@@ -244,6 +244,12 @@ foreach my $user_id ( keys %{$USERS} )
             my $kudos;
             my $kudos_end;
             my $goodtogo;
+            my $achieved;
+            my $possible = $JSON->[$X{$id}]->{NumPossibleAchievements};
+            my $score;
+            my $mode;
+            my $gamePercent;
+            
             if ( $retprogress->{$id}->{ScoreAchievedHardcore} > 0 )
             {   
                 verbose ( "\t++ $id:$JSON->[$X{$id}]->{Title} [HARDCORE]");
@@ -261,14 +267,12 @@ foreach my $user_id ( keys %{$USERS} )
                     {
                         plog ( "STORE $user:$JSON->[$X{$id}]->{GameID}:HARDCORE");
 
-                        my $gamePercent = sprintf("%.0f", 100*$retprogress->{$id}->{NumAchievedHardcore}/$JSON->[$X{$id}]->{NumPossibleAchievements});
-                        verbose ( "\t\t-> RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon})");
-                        RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon});
-                        verbose ( "\t\t-> RAB::Sprites::create($user, $JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, 'hardcore', $retprogress->{$id}->{ScoreAchievedHardcore}, $JSON->[$X{$id}]->{NumPossibleAchievements})");
-                        RAB::Sprites::create($user, $JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, 'hardcore', $retprogress->{$id}->{ScoreAchievedHardcore}, $JSON->[$X{$id}]->{NumPossibleAchievements});
-
-                        $kudos_end = ' in HARDCORE !';
-                        $goodtogo = 'ok';
+                        $achieved    = $retprogress->{$id}->{NumAchievedHardcore};
+                        $score       = $retprogress->{$id}->{ScoreAchievedHardcore};
+                        $mode        = 'hardcore';
+                        $gamePercent = sprintf("%.0f", 100*$achieved/$possible);
+                        $kudos_end   = ' in HARDCORE !';
+                        $goodtogo    = 'ok';
                     }
                 }
             }
@@ -279,7 +283,6 @@ foreach my $user_id ( keys %{$USERS} )
                 {   
                     if ( $JSON->[$X{$id}]->{NumAchieved} == $JSON->[$X{$id}]->{NumPossibleAchievements} )
                     {   
-
                         verbose ( "\t\tMarking this game ($id:$JSON->[$X{$id}]->{Title}) as DONE in DB");
                         verbose ( "\t\t-> RAB::SQLite::SetGameAsDone($user,$JSON->[$X{$id}]->{GameID},'normal')" );
                         my $done = RAB::SQLite::SetGameAsDone($user,$JSON->[$X{$id}]->{GameID},'normal');
@@ -289,19 +292,16 @@ foreach my $user_id ( keys %{$USERS} )
                             verbose ( "\t\t\tAlready in DB, doing nothing." );
                         }
                         else
-                        {   
-                            plog ( "STORE $USERS->{$user_id}{'user_twitter'}:$JSON->[$X{$id}]->{GameID}");
+                        {
+                            plog ( "STORE $user:$JSON->[$X{$id}]->{GameID}");
 
-                            my $gamePercent = sprintf("%.0f", 100*$JSON->[$X{$id}]->{NumAchieved}/$JSON->[$X{$id}]->{NumPossibleAchievements});
-                            verbose ( "\t\t-> RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon})");
-                            RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon});
-                            verbose ( "\t\t-> RAB::Sprites::create($user, $JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, 'normal', $JSON->[$X{$id}]->{ScoreAchieved}, $JSON->[$X{$id}]->{NumPossibleAchievements})");
-                            RAB::Sprites::create($user, $JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, 'normal', $JSON->[$X{$id}]->{ScoreAchieved}, $JSON->[$X{$id}]->{NumPossibleAchievements});
-
-                            $kudos_end = ' !';
-                            $goodtogo = 'ok';
+                            $achieved    = $retprogress->{$id}->{NumAchieved};
+                            $score       = $retprogress->{$id}->{ScoreAchieved};
+                            $mode        = 'normal';
+                            $gamePercent = sprintf("%.0f", 100*$achieved/$possible);
+                            $kudos_end   = ' !';
+                            $goodtogo    = 'ok';
                         }
-
                     }
                     else
                     {   
@@ -314,12 +314,17 @@ foreach my $user_id ( keys %{$USERS} )
                 }
             }
             if ( $goodtogo )
-            {   
+            {
                 verbose ( "\t\tSending tweet about this");
                 $kudos  = "\@$user Kudos, ";
-                $kudos .= "with $JSON->[$X{$id}]->{NumAchieved}/$JSON->[$X{$id}]->{NumPossibleAchievements} Achievements unlocked, ";
+                $kudos .= "with $achieved/$possible Achievements unlocked, ";
                 $kudos .= "you completed $JSON->[$X{$id}]->{Title} ($JSON->[$X{$id}]->{ConsoleName})[$JSON->[$X{$id}]->{GameID}]";
                 $kudos .= $kudos_end;
+
+                verbose ( "\t\t-> RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon})");
+                RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon});
+                verbose ( "\t\t-> RAB::Sprites::create($user, $JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, $mode, $score, $possible)");
+                RAB::Sprites::create($user, $JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, $mode, $score, $possible);
 
                 verbose ( "\t\t-> RAB::Twitter::FormatTweet($kudos)" );
                 my $tweet = RAB::Twitter::FormatTweet($kudos);
