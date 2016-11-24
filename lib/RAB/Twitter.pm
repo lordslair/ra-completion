@@ -44,7 +44,7 @@ sub FormatTweet
 
     if ( @{[$text =~ /./sg]} < $length )
     {   
-        # We're goot with text length
+        # We're good with text length
     }
     else
     {   
