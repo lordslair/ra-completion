@@ -252,7 +252,7 @@ foreach my $user_id ( keys %{$USERS} )
             
             if ( $retprogress->{$id}->{ScoreAchievedHardcore} > 0 )
             {   
-                verbose ( "\t++ $id:$JSON->[$X{$id}]->{Title} [HARDCORE]");
+                verbose ( colored("\t++ $id:$JSON->[$X{$id}]->{Title} [HARDCORE]", 'red') );
                 if ( $retprogress->{$id}->{NumAchievedHardcore} == $retprogress->{$id}->{NumPossibleAchievements} )
                 {
                     verbose ( colored("\t\t-> RAB::SQLite::SetGameAsDone($user,$JSON->[$X{$id}]->{GameID},'hardcore')", 'cyan') );
@@ -279,7 +279,7 @@ foreach my $user_id ( keys %{$USERS} )
             }
             elsif ( $retprogress->{$id}->{ScoreAchieved} > 0 )
             {     
-                verbose ( "\t== $id:$JSON->[$X{$id}]->{Title}");
+                verbose ( colored("\t== $id:$JSON->[$X{$id}]->{Title}", 'green') );
                 if ( $retprogress->{$id}->{NumAchievedHardcore} < $retprogress->{$id}->{NumPossibleAchievements} )
                 {   
                     if ( $JSON->[$X{$id}]->{NumAchieved} == $JSON->[$X{$id}]->{NumPossibleAchievements} )
