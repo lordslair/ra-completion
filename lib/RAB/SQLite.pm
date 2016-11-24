@@ -13,7 +13,11 @@ sub GetTwitterUsers
 {
     my $sth = $dbh->prepare( "SELECT user_twitter FROM Users;" );
     $sth->execute();
-    my @twitter_users = $sth->fetchrow();
+    my @twitter_users;
+    while (my $lastline = $sth->fetchrow_array)
+    {   
+        push @twitter_users, $lastline;
+    }
     $sth->finish();
 
     return @twitter_users;
