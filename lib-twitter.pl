@@ -255,7 +255,6 @@ foreach my $user_id ( keys %{$USERS} )
                 verbose ( "\t++ $id:$JSON->[$X{$id}]->{Title} [HARDCORE]");
                 if ( $retprogress->{$id}->{NumAchievedHardcore} == $retprogress->{$id}->{NumPossibleAchievements} )
                 {
-                    verbose ( "\t\tMarking this game ($id:$JSON->[$X{$id}]->{Title}) as DONE in DB");
                     verbose ( "\t\t-> RAB::SQLite::SetGameAsDone($user,$JSON->[$X{$id}]->{GameID},'hardcore')" );
                     my $done = RAB::SQLite::SetGameAsDone($user,$JSON->[$X{$id}]->{GameID},'hardcore');
 
@@ -273,6 +272,8 @@ foreach my $user_id ( keys %{$USERS} )
                         $gamePercent = sprintf("%.0f", 100*$achieved/$possible);
                         $kudos_end   = ' in HARDCORE !';
                         $goodtogo    = 'ok';
+                        
+                        verbose ( "\t\t\tMarked this game ($id:$JSON->[$X{$id}]->{Title}:$mode) as DONE in DB");                        
                     }
                 }
             }
@@ -283,7 +284,6 @@ foreach my $user_id ( keys %{$USERS} )
                 {   
                     if ( $JSON->[$X{$id}]->{NumAchieved} == $JSON->[$X{$id}]->{NumPossibleAchievements} )
                     {   
-                        verbose ( "\t\tMarking this game ($id:$JSON->[$X{$id}]->{Title}) as DONE in DB");
                         verbose ( "\t\t-> RAB::SQLite::SetGameAsDone($user,$JSON->[$X{$id}]->{GameID},'normal')" );
                         my $done = RAB::SQLite::SetGameAsDone($user,$JSON->[$X{$id}]->{GameID},'normal');
 
@@ -301,6 +301,8 @@ foreach my $user_id ( keys %{$USERS} )
                             $gamePercent = sprintf("%.0f", 100*$achieved/$possible);
                             $kudos_end   = ' !';
                             $goodtogo    = 'ok';
+                            
+                            verbose ( "\t\t\tMarked this game ($id:$JSON->[$X{$id}]->{Title}:$mode) as DONE in DB");                            
                         }
                     }
                     else
