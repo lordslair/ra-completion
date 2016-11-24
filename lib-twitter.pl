@@ -187,7 +187,7 @@ foreach my $user ( sort keys %{$DM} )
         verbose ("\tHelp requested, we got '$DM->{$user}->{'dm'}->{$id}->{'text'}'");
         my $db_help = RAB::SQLite::GetHelp($user);
 
-        if ( ! $db_help )
+        if ( ! $db_help or $db_help ne 'DONE' )
         {
             verbose ("\tSending HELP to new user");
             my $message  = "Welcome to the HELP engine.\n\n";
@@ -197,12 +197,6 @@ foreach my $user ( sort keys %{$DM} )
                $message .= "<username> should be your retroachievment.org username\n\n";
                $message .= "This message will be sent only once.";
             RAB::Twitter::SendDM($user, $message);
-            RAB::SQLite::CreateTwitterUser($DM->{$user}->{'id'},$user,'DONE');
-        }   
-        elsif ( $db_help ne 'DONE' )
-        {
-            verbose ("\tSending HELP");
-            RAB::Twitter::SendDM($user, "Welcome to the HELP engine.\nAvailable DM requests:\n\nREGISTER <username> (ex REGISTER lordslair)\nDELETE (Clean from database)\n\nThis message will be sent only once.");
             RAB::SQLite::SetAck($user);
         }   
         else
