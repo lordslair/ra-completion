@@ -331,7 +331,7 @@ foreach my $user_id ( keys %{$USERS} )
                 verbose ( colored("\t\t-> RAB::Twitter::FormatTweet($kudos)", 'cyan') );
                 my $tweet = RAB::Twitter::FormatTweet($kudos);
 
-                verbose ( colored("\t\t-> RAB::Twitter::SendTweetMedia(\"$tweet","img/$user/$JSON->[$X{$id}]->{GameID}.png\")", 'cyan') );
+                verbose ( colored("\t\t-> RAB::Twitter::SendTweetMedia(\"$tweet\",\"img/$user/$JSON->[$X{$id}]->{GameID}.png\")", 'cyan') );
                 plog ( "TWEET $user:$JSON->[$X{$id}]->{GameID}");
                 RAB::Twitter::SendTweetMedia($tweet,"img/$user/$JSON->[$X{$id}]->{GameID}.png");
             }
