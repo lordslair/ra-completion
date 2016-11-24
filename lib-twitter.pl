@@ -215,11 +215,13 @@ my $USERS = RAB::SQLite::GetRegisteredUsers;
 
 foreach my $user_id ( keys %{$USERS} )
 {
-    verbose ("\t-> RAB::RAAPI::GetUserRecentlyPlayedGames($rafile,$USERS->{$user_id}{'user_ra'})");
-    my $return = RAB::RAAPI::GetUserRecentlyPlayedGames($rafile,$USERS->{$user_id}{'user_ra'});
+    my $user_ra = $USERS->{$user_id}{'user_ra'};
+    
+    verbose ("\t-> RAB::RAAPI::GetUserRecentlyPlayedGames($rafile,$user_ra)");
+    my $return = RAB::RAAPI::GetUserRecentlyPlayedGames($rafile,$user_ra);
 
     if ($return)
-    {
+    {   
         verbose ("\tList of recent achievements received");
         my $JSON = decode_json($return);
         my %X;
@@ -227,15 +229,15 @@ foreach my $user_id ( keys %{$USERS} )
 
         my $max = scalar @{$JSON}; # Because I'm not sure I'll receive 10 last played games
         for (my $i = 0; $i < $max; $i++) # And we loop
-        {
+        {   
             push @csv, $JSON->[$i]->{GameID};
             $X{$JSON->[$i]->{GameID}} = $i;
-        }       
+        }
 
-        verbose ("\t-> RAB::RAAPI::GetUserProgress($rafile,$USERS->{$user_id}{'user_ra'},@csv)");
-        my $retprogress = RAB::RAAPI::GetUserProgress($rafile,$USERS->{$user_id}{'user_ra'},\@csv);
+        verbose ("\t-> RAB::RAAPI::GetUserProgress($rafile,$user_ra,@csv)");
+        my $retprogress = RAB::RAAPI::GetUserProgress($rafile,$user_ra,\@csv);
         verbose ("We're done with retroachievement.org API requests");
-
+        
         foreach my $id ( keys %{$retprogress} )
         {
             my $kudos;
