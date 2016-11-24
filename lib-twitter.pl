@@ -4,6 +4,7 @@ use warnings;
 
 use Data::Dumper;
 use Getopt::Long;
+use Term::ANSIColor;
 
 use lib './lib';
 use YAML::Tiny;
@@ -107,7 +108,7 @@ else
 
 my @twitter_users = RAB::SQLite::GetTwitterUsers;
 
-verbose ("-> RAB::Twitter::Statuses");
+verbose ( colored("-> RAB::Twitter::Statuses", 'cyan') );
 my $DM = RAB::Twitter::Statuses;
 foreach my $user ( sort keys %{$DM} )
 {
@@ -135,7 +136,7 @@ foreach my $user ( sort keys %{$DM} )
         if ( $ack ne 'yes' )
         {
             my $user_ra = $1;
-            verbose ("\t-> RAB::RAAPI::GetUserRankAndScore($rafile,$user_ra)");
+            verbose ( colored("\t-> RAB::RAAPI::GetUserRankAndScore($rafile,$user_ra)", 'cyan') );
             my $return = RAB::RAAPI::GetUserRankAndScore($rafile,$user_ra);
 
             if ($return)
@@ -150,7 +151,7 @@ foreach my $user ( sort keys %{$DM} )
                     verbose ("\tRegistered on RA ($user), sending ACK");
                     RAB::Twitter::SendDM($user, "You're now registered\nI've associated \@$user and RetroAchievement account $user_ra");
 
-                    verbose ("\t-> RAB::SQLite::AddRAUser($user,$user_ra)");
+                    verbose ( colored("\t-> RAB::SQLite::AddRAUser($user,$user_ra)", 'cyan') );
                     RAB::SQLite::AddRAUser($user,$user_ra);
                 }
             }
@@ -171,7 +172,7 @@ foreach my $user ( sort keys %{$DM} )
 
         if ( ($ret) && ($ret eq $user) )
         {   
-            verbose ("\t->RAB::SQLite::DeleteUser($user)");
+            verbose ( colored("\t->RAB::SQLite::DeleteUser($user)", 'cyan') );
             RAB::SQLite::DeleteUser($user);
             plog ( "DELETE $user");
             RAB::Twitter::SendDM($user, "Request acknowledged.\nYou're cleaned from our databases now.");
@@ -217,7 +218,7 @@ foreach my $user_id ( keys %{$USERS} )
     my $user    = $USERS->{$user_id}{'user_twitter'};
     my $user_ra = $USERS->{$user_id}{'user_ra'};
     
-    verbose ("\t-> RAB::RAAPI::GetUserRecentlyPlayedGames($rafile,$user_ra)");
+    verbose ( colored("\t-> RAB::RAAPI::GetUserRecentlyPlayedGames($rafile,$user_ra)", 'cyan') );
     my $return = RAB::RAAPI::GetUserRecentlyPlayedGames($rafile,$user_ra);
 
     if ($return)
@@ -234,7 +235,7 @@ foreach my $user_id ( keys %{$USERS} )
             $X{$JSON->[$i]->{GameID}} = $i;
         }
 
-        verbose ("\t-> RAB::RAAPI::GetUserProgress($rafile,$user_ra,@csv)");
+        verbose ( colored("\t-> RAB::RAAPI::GetUserProgress($rafile,$user_ra,@csv)", 'cyan') );
         my $retprogress = RAB::RAAPI::GetUserProgress($rafile,$user_ra,\@csv);
         verbose ("We're done with retroachievement.org API requests");
         
@@ -254,7 +255,7 @@ foreach my $user_id ( keys %{$USERS} )
                 verbose ( "\t++ $id:$JSON->[$X{$id}]->{Title} [HARDCORE]");
                 if ( $retprogress->{$id}->{NumAchievedHardcore} == $retprogress->{$id}->{NumPossibleAchievements} )
                 {
-                    verbose ( "\t\t-> RAB::SQLite::SetGameAsDone($user,$JSON->[$X{$id}]->{GameID},'hardcore')" );
+                    verbose ( colored("\t\t-> RAB::SQLite::SetGameAsDone($user,$JSON->[$X{$id}]->{GameID},'hardcore')", 'cyan') );
                     my $done = RAB::SQLite::SetGameAsDone($user,$JSON->[$X{$id}]->{GameID},'hardcore');
 
                     if ( $done eq 'already_in_db')
@@ -283,7 +284,7 @@ foreach my $user_id ( keys %{$USERS} )
                 {   
                     if ( $JSON->[$X{$id}]->{NumAchieved} == $JSON->[$X{$id}]->{NumPossibleAchievements} )
                     {   
-                        verbose ( "\t\t-> RAB::SQLite::SetGameAsDone($user,$JSON->[$X{$id}]->{GameID},'normal')" );
+                        verbose ( colored("\t\t-> RAB::SQLite::SetGameAsDone($user,$JSON->[$X{$id}]->{GameID},'normal')", 'cyan') );
                         my $done = RAB::SQLite::SetGameAsDone($user,$JSON->[$X{$id}]->{GameID},'normal');
 
                         if ( $done eq 'already_in_db')
@@ -322,15 +323,15 @@ foreach my $user_id ( keys %{$USERS} )
                 $kudos .= "you completed $JSON->[$X{$id}]->{Title} ($JSON->[$X{$id}]->{ConsoleName})[$JSON->[$X{$id}]->{GameID}]";
                 $kudos .= $kudos_end;
 
-                verbose ( "\t\t-> RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon})");
+                verbose ( colored("\t\t-> RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon})", 'cyan') );
                 RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon});
-                verbose ( "\t\t-> RAB::Sprites::create($user, $JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, $mode, $score, $possible)");
+                verbose ( colored("\t\t-> RAB::Sprites::create($user, $JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, $mode, $score, $possible)", 'cyan') );
                 RAB::Sprites::create($user, $JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, $mode, $score, $possible);
 
-                verbose ( "\t\t-> RAB::Twitter::FormatTweet($kudos)" );
+                verbose ( colored("\t\t-> RAB::Twitter::FormatTweet($kudos)", 'cyan') );
                 my $tweet = RAB::Twitter::FormatTweet($kudos);
 
-                verbose ( "\t\t-> RAB::Twitter::SendTweetMedia(\"$tweet","img/$user/$JSON->[$X{$id}]->{GameID}.png\")" );
+                verbose ( colored("\t\t-> RAB::Twitter::SendTweetMedia(\"$tweet","img/$user/$JSON->[$X{$id}]->{GameID}.png\")", 'cyan') );
                 plog ( "TWEET $user:$JSON->[$X{$id}]->{GameID}");
                 RAB::Twitter::SendTweetMedia($tweet,"img/$user/$JSON->[$X{$id}]->{GameID}.png");
             }
