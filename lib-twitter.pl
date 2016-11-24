@@ -203,7 +203,6 @@ foreach my $user ( sort keys %{$DM} )
             verbose ("\tHelp already send. I did nothing.");
         }   
     }
-
 }
 
 verbose ("We're done with twitter requests");
