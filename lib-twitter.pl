@@ -190,7 +190,13 @@ foreach my $user ( sort keys %{$DM} )
         if ( ! $db_help )
         {
             verbose ("\tSending HELP to new user");
-            RAB::Twitter::SendDM($user, "Welcome to the HELP engine.\nAvailable DM requests:\n\nREGISTER <username> (ex REGISTER lordslair)\nDELETE (Clean from database)\n\nThis message will be sent only once.");
+            my $message  = "Welcome to the HELP engine.\n\n";
+               $message .= "Available DM requests:\n";
+               $message .= "REGISTER <username> (ex REGISTER lordslair)\n";
+               $message .= "DELETE (Clean from database)\n\n";
+               $message .= "<username> should be your retroachievment.org username\n\n";
+               $message .= "This message will be sent only once.";
+            RAB::Twitter::SendDM($user, $message);
             RAB::SQLite::CreateTwitterUser($DM->{$user}->{'id'},$user,'DONE');
         }   
         elsif ( $db_help ne 'DONE' )
