@@ -39,7 +39,7 @@ sub Statuses
 sub FormatTweet
 {
     my $text   = shift;
-    my $tco    = 25;
+    my $tco    = 15;
     my $length = 140 - $tco;
 
     if ( @{[$text =~ /./sg]} < $length )
