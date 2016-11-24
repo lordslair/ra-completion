@@ -321,7 +321,7 @@ foreach my $user_id ( keys %{$USERS} )
                     verbose ( "\t\tGame already completed in hardcore ($retprogress->{$id}->{NumAchievedHardcore}/$retprogress->{$id}->{NumPossibleAchievements})\t=> No tweet" );
                 }
             }
-            if ( $goodtogo )
+            if ( $goodtogo and $goodtogo eq 'ok' )
             {
                 verbose ( "\t\tSending tweet about this");
                 $kudos  = "\@$user Kudos, ";
