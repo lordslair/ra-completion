@@ -312,7 +312,7 @@ foreach my $user_id ( keys %{$USERS} )
                 }
                 else
                 {   
-                    verbose ( "\t\t$retprogress->{$id}->{NumAchieved}/$retprogress->{$id}->{NumPossibleAchievements} for game $JSON->[$id]->{GameID} ($JSON->[$id]->{ImageIcon}) = Not enough progress" );
+                    verbose ( "\t\t$retprogress->{$id}->{NumAchieved}/$retprogress->{$id}->{NumPossibleAchievements} for game $JSON->[$X{$id}]->{GameID} ($JSON->[$X{$id}]->{ImageIcon}) = Not enough progress" );
                 }
             }
             if ( $goodtogo )
