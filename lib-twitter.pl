@@ -290,7 +290,7 @@ foreach my $user_id ( keys %{$USERS} )
                     }
                 }
             }
-            elsif ( $retprogress->{$id}->{ScoreAchieved} > 0 )
+            if ( $retprogress->{$id}->{ScoreAchieved} > 0 )
             {
                 verbose ( colored("\t== $id:$JSON->[$X{$id}]->{Title}", 'green') );
                 if ( $retprogress->{$id}->{NumAchievedHardcore} < $retprogress->{$id}->{NumPossibleAchievements} )
