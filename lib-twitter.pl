@@ -228,6 +228,7 @@ foreach my $user_id ( keys %{$USERS} )
 {
     my $user    = $USERS->{$user_id}{'user_twitter'};
     my $user_ra = $USERS->{$user_id}{'user_ra'};
+    verbose ( "Looping on $user:$user_ra games Achievements" );
     
     verbose ( colored("\t-> RAB::RAAPI::GetUserRecentlyPlayedGames($rafile,$user_ra)", 'cyan') );
     my $return = RAB::RAAPI::GetUserRecentlyPlayedGames($rafile,$user_ra);
@@ -248,7 +249,7 @@ foreach my $user_id ( keys %{$USERS} )
 
         verbose ( colored("\t-> RAB::RAAPI::GetUserProgress($rafile,$user_ra,@csv)", 'cyan') );
         my $retprogress = RAB::RAAPI::GetUserProgress($rafile,$user_ra,\@csv);
-        verbose ("We're done with retroachievement.org API requests");
+        verbose ("\tWe're done with retroachievement.org API requests");
         
         foreach my $id ( keys %{$retprogress} )
         {
