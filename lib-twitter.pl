@@ -33,7 +33,7 @@ GetOptions( \%opts,
 
 # Mini-verbose sub
 sub verbose
-{   
+{
     if ($opts{'verbose'})
     {   
         my $text2verb = join(' ', @_);print "[ ".$text2verb."\n";
@@ -52,17 +52,17 @@ sub plog
                      $lt[3],$lt[2],$lt[1],$lt[0]);
 
     unless (open(F,">>$logfile"))
-    {
+    {   
         warn "$dt $0: sub plog: Failed to open logfile ($logfile) for write.\n";
     }
     else
-    {
+    {   
         if ( $msg )
-        {
+        {   
             print F "$dt $msgprefix $msg\n";
         }
         else
-        {
+        {   
             warn "$dt $0: sub plog: No message!\n";
         }
         close F;
@@ -71,7 +71,7 @@ sub plog
 
 # --help
 if ( $opts{'help'} )
-{   
+{
     printf STDERR ("Syntax: %s [-h|-v]\n", $0);
     printf STDERR ("  -h, --help                           this help                              |\n");
     printf STDERR ("  -v, --verbose                        increase verbosity                     |\n");
@@ -97,11 +97,11 @@ else
 }
 
 if ( -f "$rafile" )
-{   
+{
     verbose ("We got the YAMLfile : $rafile");
 }
 else
-{   
+{
     printf STDERR ("Config file $rafile does not exist\n");
     exit 2;
 }
@@ -118,32 +118,33 @@ foreach my $user ( sort keys %{$DM} )
     verbose ("\tDM($id): $DM->{$user}->{'dm'}->{$id}->{'text'}");
 
     if ( $DM->{$user}->{'dm'}->{$id}->{'text'} =~ /^REGISTER\s?(\w*)/ )
-    {
+    {   
 
         if (! grep( /^$user$/, @twitter_users ))
-        {
+        {   
             plog ( "REGISTER $user");
             RAB::SQLite::CreateTwitterUser($DM->{$user}->{'id'},$user,'');
             verbose ("\tAdded in DB ($DM->{$user}->{'id'},$user)");
         }
         else
-        {
+        {   
             verbose ("\tAlready in DB ($DM->{$user}->{'id'},$user)");
         }
 
         my $ack = RAB::SQLite::GetAck($user);
 
         if ( $ack ne 'yes' )
-        {
+        {   
             my $user_ra = $1;
             verbose ( colored("\t-> RAB::RAAPI::GetUserRankAndScore($rafile,$user_ra)", 'cyan') );
             my $return = RAB::RAAPI::GetUserRankAndScore($rafile,$user_ra);
 
             if ($return)
-            {
+            {   
                 if ( $return eq '{"Score":0,"Rank":"1"}' )
-                {
+                {   
                     verbose ("\tNot registered on RA, or shit happened");
+
                     if ( $ack eq 'fail' )
                     {
                          verbose ("\tAlready sent fail registration DM. I did nothing.");
@@ -158,7 +159,7 @@ foreach my $user ( sort keys %{$DM} )
                     }
                 }
                 else
-                { 
+                {
                     verbose ("\tRegistered on RA ($user), sending ACK");
                     RAB::Twitter::SendDM($user, "You're now registered\nI've associated \@$user and RetroAchievement account $user_ra");
 
@@ -166,7 +167,7 @@ foreach my $user ( sort keys %{$DM} )
                     RAB::SQLite::AddRAUser($user,$user_ra);
                 }
             }
-            else    
+            else
             {
                 print "Erreur: No answer from RA API\n";
             }
@@ -182,7 +183,7 @@ foreach my $user ( sort keys %{$DM} )
         my $ret = RAB::SQLite::GetTwitterUserIfExist($user);
 
         if ( ($ret) && ($ret eq $user) )
-        {   
+        {
             verbose ( colored("\t->RAB::SQLite::DeleteUser($user)", 'cyan') );
             RAB::SQLite::DeleteUser($user);
             plog ( "DELETE $user");
@@ -209,11 +210,11 @@ foreach my $user ( sort keys %{$DM} )
                $message .= "This message will be sent only once.";
             RAB::Twitter::SendDM($user, $message);
             RAB::SQLite::SetHelp($user);
-        }   
+        }
         else
         {
             verbose ("\tHelp already send. I did nothing.");
-        }   
+        }
     }
 }
 
@@ -229,12 +230,12 @@ foreach my $user_id ( keys %{$USERS} )
     my $user    = $USERS->{$user_id}{'user_twitter'};
     my $user_ra = $USERS->{$user_id}{'user_ra'};
     verbose ( "Looping on \@$user:$user_ra games Achievements" );
-    
+
     verbose ( colored("\t-> RAB::RAAPI::GetUserRecentlyPlayedGames($rafile,$user_ra)", 'cyan') );
     my $return = RAB::RAAPI::GetUserRecentlyPlayedGames($rafile,$user_ra);
 
     if ($return)
-    {   
+    {
         verbose ("\tList of recent achievements received");
         my $JSON = decode_json($return);
         my %X;
@@ -242,7 +243,7 @@ foreach my $user_id ( keys %{$USERS} )
 
         my $max = scalar @{$JSON}; # Because I'm not sure I'll receive 10 last played games
         for (my $i = 0; $i < $max; $i++) # And we loop
-        {   
+        {
             push @csv, $JSON->[$i]->{GameID};
             $X{$JSON->[$i]->{GameID}} = $i;
         }
@@ -250,7 +251,7 @@ foreach my $user_id ( keys %{$USERS} )
         verbose ( colored("\t-> RAB::RAAPI::GetUserProgress($rafile,$user_ra,@csv)", 'cyan') );
         my $retprogress = RAB::RAAPI::GetUserProgress($rafile,$user_ra,\@csv);
         verbose ("\tWe're done with retroachievement.org API requests");
-        
+
         foreach my $id ( keys %{$retprogress} )
         {
             my $kudos;
@@ -261,9 +262,9 @@ foreach my $user_id ( keys %{$USERS} )
             my $score;
             my $mode;
             my $gamePercent;
-            
+
             if ( $retprogress->{$id}->{ScoreAchievedHardcore} > 0 )
-            {   
+            {
                 verbose ( colored("\t++ $id:$JSON->[$X{$id}]->{Title} [HARDCORE]", 'red') );
                 if ( $retprogress->{$id}->{NumAchievedHardcore} == $retprogress->{$id}->{NumPossibleAchievements} )
                 {
@@ -284,23 +285,23 @@ foreach my $user_id ( keys %{$USERS} )
                         $gamePercent = sprintf("%.0f", 100*$achieved/$possible);
                         $kudos_end   = ' in HARDCORE !';
                         $goodtogo    = 'ok';
-                        
-                        verbose ( "\t\t\tMarked this game ($id:$JSON->[$X{$id}]->{Title}:$mode) as DONE in DB");                        
+
+                        verbose ( "\t\t\tMarked this game ($id:$JSON->[$X{$id}]->{Title}:$mode) as DONE in DB");
                     }
                 }
             }
             elsif ( $retprogress->{$id}->{ScoreAchieved} > 0 )
-            {     
+            {
                 verbose ( colored("\t== $id:$JSON->[$X{$id}]->{Title}", 'green') );
                 if ( $retprogress->{$id}->{NumAchievedHardcore} < $retprogress->{$id}->{NumPossibleAchievements} )
-                {   
+                {
                     if ( $JSON->[$X{$id}]->{NumAchieved} == $JSON->[$X{$id}]->{NumPossibleAchievements} )
-                    {   
+                    {
                         verbose ( colored("\t\t-> RAB::SQLite::SetGameAsDone($user,$JSON->[$X{$id}]->{GameID},'normal')", 'cyan') );
                         my $done = RAB::SQLite::SetGameAsDone($user,$JSON->[$X{$id}]->{GameID},'normal');
 
                         if ( $done eq 'already_in_db')
-                        {   
+                        {
                             verbose ( "\t\t\tAlready in DB, doing nothing." );
                         }
                         else
@@ -313,12 +314,12 @@ foreach my $user_id ( keys %{$USERS} )
                             $gamePercent = sprintf("%.0f", 100*$achieved/$possible);
                             $kudos_end   = ' !';
                             $goodtogo    = 'ok';
-                            
-                            verbose ( "\t\t\tMarked this game ($id:$JSON->[$X{$id}]->{Title}:$mode) as DONE in DB");                            
+
+                            verbose ( "\t\t\tMarked this game ($id:$JSON->[$X{$id}]->{Title}:$mode) as DONE in DB");
                         }
                     }
                     else
-                    {   
+                    {
                         verbose ( "\t\tGame in progress but not completed ($JSON->[$X{$id}]->{NumAchieved}/$JSON->[$X{$id}]->{NumPossibleAchievements})\t=> No tweet" );
                     }
                 }
@@ -327,6 +328,7 @@ foreach my $user_id ( keys %{$USERS} )
                     verbose ( "\t\tGame already completed in hardcore ($retprogress->{$id}->{NumAchievedHardcore}/$retprogress->{$id}->{NumPossibleAchievements})\t=> No tweet" );
                 }
             }
+
             if ( $goodtogo and $goodtogo eq 'ok' )
             {
                 verbose ( "\t\tSending tweet about this");
