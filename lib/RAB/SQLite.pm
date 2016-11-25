@@ -44,6 +44,13 @@ sub GetAck
     return $ack;
 }
 
+sub SetAck
+{   
+    my $user = shift;
+    my $ack  = shift;
+    $dbh->do("UPDATE Users SET ack='$ack' WHERE user_twitter='$user'");
+}
+
 sub SetHelp
 {
     my $user = shift;
