@@ -144,7 +144,18 @@ foreach my $user ( sort keys %{$DM} )
                 if ( $return eq '{"Score":0,"Rank":"1"}' )
                 {
                     verbose ("\tNot registered on RA, or shit happened");
-                    RAB::Twitter::SendDM($user, "I couldn't find your username '$user_ra' on RA.org\nCheck it out, and come back to me.");
+                    if ( $ack eq 'fail' )
+                    {
+                         verbose ("\tAlready sent fail registration DM. I did nothing.");
+                    }
+                    else
+                    {   
+                        my $tweet = "I couldn't find your username '$user_ra' on RA.org. Check it out, and come back to me.";
+                        verbose ( colored("\t-> RAB::Twitter::SendDM($user, $tweet)", 'cyan') );
+                        RAB::Twitter::SendDM($user, $tweet);
+                        verbose ( colored("\t-> RAB::SQLite::SetAck($user, 'fail')", 'cyan') );
+                        RAB::SQLite::SetAck($user, 'fail');
+                    }
                 }
                 else
                 { 
