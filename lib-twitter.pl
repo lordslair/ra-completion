@@ -331,16 +331,16 @@ foreach my $user_id ( keys %{$USERS} )
 
             if ( $goodtogo and $goodtogo eq 'ok' )
             {
+                verbose ( colored("\t\t-> RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon})", 'cyan') );
+                RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon});
+                verbose ( colored("\t\t-> RAB::Sprites::create($user, $JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, $mode, $score, $possible)", 'cyan') );
+                RAB::Sprites::create($user, $JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, $mode, $score, $possible);
+
                 verbose ( "\t\tSending tweet about this");
                 $kudos  = "\@$user Kudos, ";
                 $kudos .= "with $achieved/$possible Achievements unlocked, ";
                 $kudos .= "you completed $JSON->[$X{$id}]->{Title} ($JSON->[$X{$id}]->{ConsoleName})[$JSON->[$X{$id}]->{GameID}]";
                 $kudos .= $kudos_end;
-
-                verbose ( colored("\t\t-> RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon})", 'cyan') );
-                RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon});
-                verbose ( colored("\t\t-> RAB::Sprites::create($user, $JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, $mode, $score, $possible)", 'cyan') );
-                RAB::Sprites::create($user, $JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, $mode, $score, $possible);
 
                 verbose ( colored("\t\t-> RAB::Twitter::FormatTweet($kudos)", 'cyan') );
                 my $tweet = RAB::Twitter::FormatTweet($kudos);
