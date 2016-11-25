@@ -197,7 +197,7 @@ foreach my $user ( sort keys %{$DM} )
                $message .= "<username> should be your retroachievment.org username\n\n";
                $message .= "This message will be sent only once.";
             RAB::Twitter::SendDM($user, $message);
-            RAB::SQLite::SetAck($user);
+            RAB::SQLite::SetHelp($user);
         }   
         else
         {
