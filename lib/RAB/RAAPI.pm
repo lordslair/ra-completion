@@ -15,7 +15,7 @@ sub GetUserRecentlyPlayedGames
     my $user   = shift;
 
     my $browser = new LWP::UserAgent;
-    my $request = new HTTP::Request( GET => "http://retroachievements.org/API/API_GetUserRecentlyPlayedGames.php?z=$rayaml->[0]{ra_user}&y=$rayaml->[0]{ra_api_key}&u=$user" );
+    my $request = new HTTP::Request( GET => "http://retroachievements.org/API/API_GetUserRecentlyPlayedGames.php?z=$rayaml->[0]{ra_user}&y=$rayaml->[0]{ra_api_key}&u=$user&c=25" );
     my $headers = $request->headers();
        $headers->header( 'User-Agent','Mozilla/5.0 (compatible; Konqueror/3.4; Linux) KHTML/3.4.2 (like Gecko)');
        $headers->header( 'Accept', 'text/html, image/jpeg, image/png, text/*, image/*, */*');
