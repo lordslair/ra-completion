@@ -20,7 +20,6 @@ binmode(STDOUT, ":utf8");
 # Variables initialization
 #
 my %opts;
-my $logfile = './lib-twitter.log';
 my $twitterfile;
 my $rafile;
 
@@ -31,43 +30,18 @@ GetOptions( \%opts,
             "help|h",
           );
 
-# Mini-verbose sub
-sub verbose
-{
-    if ($opts{'verbose'})
-    {   
-        my $text2verb = join(' ', @_);print "[ ".$text2verb."\n";
-    }
+my $daemonName    = "ra_bot";
+my $logging       = 1;                                     # 1= logging is on
+my $logFilePath   = "/home/ra_bot/log/";                   # log file path
+my $logFile       = $logFilePath . $daemonName . ".log";
+
+# turn on logging
+if ($logging) {
+    open LOG, ">>$logFile";
+    select((select(LOG), $|=1)[0]); # make the log file "hot" - turn off buffering
 }
 
-# Mini-log sub
-sub plog
-{
-    my $msg       = shift;
-    my @lt        = localtime;
-    my $msgprefix = '|';
-    # Format current datetime sensibly:
-    my $dt = sprintf("%d-%02d-%02d %02d:%02d:%02d",
-                     $lt[5]+1900,$lt[4]+1,
-                     $lt[3],$lt[2],$lt[1],$lt[0]);
-
-    unless (open(F,">>$logfile"))
-    {   
-        warn "$dt $0: sub plog: Failed to open logfile ($logfile) for write.\n";
-    }
-    else
-    {   
-        if ( $msg )
-        {   
-            print F "$dt $msgprefix $msg\n";
-        }
-        else
-        {   
-            warn "$dt $0: sub plog: No message!\n";
-        }
-        close F;
-    }
-}
+logEntry("Starting daemon");
 
 # --help
 if ( $opts{'help'} )
@@ -88,7 +62,7 @@ if ( $opts{'config-ra'}      ) { $rafile = $opts{'config-ra'}           } else {
 
 if ( -f "$twitterfile" )
 {
-    verbose ("We got the YAMLfile : $twitterfile");
+    logEntry("We got the YAMLfile : $twitterfile");
 }
 else
 {
@@ -98,7 +72,7 @@ else
 
 if ( -f "$rafile" )
 {
-    verbose ("We got the YAMLfile : $rafile");
+    logEntry("We got the YAMLfile : $rafile");
 }
 else
 {
@@ -108,27 +82,27 @@ else
 
 my @twitter_users = RAB::SQLite::GetTwitterUsers;
 
-verbose ( colored("-> RAB::Twitter::Statuses", 'cyan') );
+logEntry( colored("-> RAB::Twitter::Statuses", 'cyan') );
 my $DM = RAB::Twitter::Statuses;
 foreach my $user ( sort keys %{$DM} )
 {
-    verbose ("User $user");
+    logEntry("User $user");
 
     my $id = (reverse sort keys %{$DM->{$user}->{'dm'}})[0];
-    verbose ("\tDM($id): $DM->{$user}->{'dm'}->{$id}->{'text'}");
+    logEntry("\tDM($id): $DM->{$user}->{'dm'}->{$id}->{'text'}");
 
     if ( $DM->{$user}->{'dm'}->{$id}->{'text'} =~ /^REGISTER\s?(\w*)/ )
     {   
 
         if (! grep( /^$user$/, @twitter_users ))
         {   
-            plog ( "REGISTER $user");
+            logEntry( "REGISTER $user");
             RAB::SQLite::CreateTwitterUser($DM->{$user}->{'id'},$user,'');
-            verbose ("\tAdded in DB ($DM->{$user}->{'id'},$user)");
+            logEntry("\tAdded in DB ($DM->{$user}->{'id'},$user)");
         }
         else
         {   
-            verbose ("\tAlready in DB ($DM->{$user}->{'id'},$user)");
+            logEntry("\tAlready in DB ($DM->{$user}->{'id'},$user)");
         }
 
         my $ack = RAB::SQLite::GetAck($user);
@@ -136,34 +110,34 @@ foreach my $user ( sort keys %{$DM} )
         if ( $ack ne 'yes' )
         {   
             my $user_ra = $1;
-            verbose ( colored("\t-> RAB::RAAPI::GetUserRankAndScore($rafile,$user_ra)", 'cyan') );
+            logEntry( colored("\t-> RAB::RAAPI::GetUserRankAndScore($rafile,$user_ra)", 'cyan') );
             my $return = RAB::RAAPI::GetUserRankAndScore($rafile,$user_ra);
 
             if ($return)
             {   
                 if ( $return eq '{"Score":0,"Rank":"1"}' )
                 {   
-                    verbose ("\tNot registered on RA, or shit happened");
+                    logEntry("\tNot registered on RA, or shit happened");
 
                     if ( $ack eq 'fail' )
                     {
-                         verbose ("\tAlready sent fail registration DM. I did nothing.");
+                         logEntry("\tAlready sent fail registration DM. I did nothing.");
                     }
                     else
                     {   
                         my $tweet = "I couldn't find your username '$user_ra' on RA.org. Check it out, and come back to me.";
-                        verbose ( colored("\t-> RAB::Twitter::SendDM($user, $tweet)", 'cyan') );
+                        logEntry( colored("\t-> RAB::Twitter::SendDM($user, $tweet)", 'cyan') );
                         RAB::Twitter::SendDM($user, $tweet);
-                        verbose ( colored("\t-> RAB::SQLite::SetAck($user, 'fail')", 'cyan') );
+                        logEntry( colored("\t-> RAB::SQLite::SetAck($user, 'fail')", 'cyan') );
                         RAB::SQLite::SetAck($user, 'fail');
                     }
                 }
                 else
                 {
-                    verbose ("\tRegistered on RA ($user), sending ACK");
+                    logEntry("\tRegistered on RA ($user), sending ACK");
                     RAB::Twitter::SendDM($user, "You're now registered\nI've associated \@$user and RetroAchievement account $user_ra");
 
-                    verbose ( colored("\t-> RAB::SQLite::AddRAUser($user,$user_ra)", 'cyan') );
+                    logEntry( colored("\t-> RAB::SQLite::AddRAUser($user,$user_ra)", 'cyan') );
                     RAB::SQLite::AddRAUser($user,$user_ra);
                 }
             }
@@ -174,34 +148,34 @@ foreach my $user ( sort keys %{$DM} )
         }
         else
         {
-            verbose ("\tAlready got acknowledged (\$ack = $ack), so no DM sent");
+            logEntry("\tAlready got acknowledged (\$ack = $ack), so no DM sent");
         }
     }
     elsif ($DM->{$user}->{'dm'}->{$id}->{'text'} =~ /^DELETE/ )
     {
-        verbose ("\tDelete requested");
+        logEntry("\tDelete requested");
         my $ret = RAB::SQLite::GetTwitterUserIfExist($user);
 
         if ( ($ret) && ($ret eq $user) )
         {
-            verbose ( colored("\t->RAB::SQLite::DeleteUser($user)", 'cyan') );
+            logEntry( colored("\t->RAB::SQLite::DeleteUser($user)", 'cyan') );
             RAB::SQLite::DeleteUser($user);
-            plog ( "DELETE $user");
+            logEntry( "DELETE $user");
             RAB::Twitter::SendDM($user, "Request acknowledged.\nYou're cleaned from our databases now.");
         }
         else
         {
-            verbose ("\tUser $user does not exists in DB. I did nothing.");
+            logEntry("\tUser $user does not exists in DB. I did nothing.");
         }
     }
     elsif (( $DM->{$user}->{'dm'}->{$id}->{'text'} =~ /^HELP/ ) || ( $DM->{$user}->{'dm'}->{$id}->{'text'} !~ /(^HELP)|(^DELETE)|(^REGISTER\s?(\w*))/ ))
     {
-        verbose ("\tHelp requested, we got '$DM->{$user}->{'dm'}->{$id}->{'text'}'");
+        logEntry("\tHelp requested, we got '$DM->{$user}->{'dm'}->{$id}->{'text'}'");
         my $db_help = RAB::SQLite::GetHelp($user);
 
         if ( ! $db_help or $db_help ne 'DONE' )
         {
-            verbose ("\tSending HELP to new user");
+            logEntry("\tSending HELP to new user");
             my $message  = "Welcome to the HELP engine.\n\n";
                $message .= "Available DM requests:\n";
                $message .= "REGISTER <username> (ex REGISTER lordslair)\n";
@@ -213,12 +187,12 @@ foreach my $user ( sort keys %{$DM} )
         }
         else
         {
-            verbose ("\tHelp already send. I did nothing.");
+            logEntry("\tHelp already send. I did nothing.");
         }
     }
 }
 
-verbose ("We're done with twitter requests");
+logEntry("We're done with twitter requests");
 
 # Now we're looping only on followers and registered users
 # To fetch data from RA on them
@@ -229,14 +203,14 @@ foreach my $user_id ( keys %{$USERS} )
 {
     my $user    = $USERS->{$user_id}{'user_twitter'};
     my $user_ra = $USERS->{$user_id}{'user_ra'};
-    verbose ( "Looping on \@$user:$user_ra games Achievements" );
+    logEntry( "Looping on \@$user:$user_ra games Achievements" );
 
-    verbose ( colored("\t-> RAB::RAAPI::GetUserRecentlyPlayedGames($rafile,$user_ra)", 'cyan') );
+    logEntry( colored("\t-> RAB::RAAPI::GetUserRecentlyPlayedGames($rafile,$user_ra)", 'cyan') );
     my $return = RAB::RAAPI::GetUserRecentlyPlayedGames($rafile,$user_ra);
 
     if ($return)
     {
-        verbose ("\tList of recent achievements received");
+        logEntry("\tList of recent achievements received");
         my $JSON = decode_json($return);
         my %X;
         my @csv;
@@ -248,9 +222,9 @@ foreach my $user_id ( keys %{$USERS} )
             $X{$JSON->[$i]->{GameID}} = $i;
         }
 
-        verbose ( colored("\t-> RAB::RAAPI::GetUserProgress($rafile,$user_ra,@csv)", 'cyan') );
+        logEntry( colored("\t-> RAB::RAAPI::GetUserProgress($rafile,$user_ra,@csv)", 'cyan') );
         my $retprogress = RAB::RAAPI::GetUserProgress($rafile,$user_ra,\@csv);
-        verbose ("\tWe're done with retroachievement.org API requests");
+        logEntry("\tWe're done with retroachievement.org API requests");
 
         foreach my $id ( keys %{$retprogress} )
         {
@@ -265,19 +239,19 @@ foreach my $user_id ( keys %{$USERS} )
 
             if ( $retprogress->{$id}->{ScoreAchievedHardcore} > 0 )
             {
-                verbose ( colored("\t++ $id:$JSON->[$X{$id}]->{Title} [HARDCORE]", 'red') );
+                logEntry( colored("\t++ $id:$JSON->[$X{$id}]->{Title} [HARDCORE]", 'red') );
                 if ( $retprogress->{$id}->{NumAchievedHardcore} == $retprogress->{$id}->{NumPossibleAchievements} )
                 {
-                    verbose ( colored("\t\t-> RAB::SQLite::SetGameAsDone($user,$JSON->[$X{$id}]->{GameID},'hardcore')", 'cyan') );
+                    logEntry( colored("\t\t-> RAB::SQLite::SetGameAsDone($user,$JSON->[$X{$id}]->{GameID},'hardcore')", 'cyan') );
                     my $done = RAB::SQLite::SetGameAsDone($user,$JSON->[$X{$id}]->{GameID},'hardcore');
 
                     if ( $done eq 'already_in_db')
                     {
-                        verbose ( "\t\t\tAlready in DB, doing nothing." );
+                        logEntry( "\t\t\tAlready in DB, doing nothing." );
                     }
                     else
                     {
-                        plog ( "STORE $user:$JSON->[$X{$id}]->{GameID}:HARDCORE");
+                        logEntry( "STORE $user:$JSON->[$X{$id}]->{GameID}:HARDCORE");
 
                         $achieved    = $retprogress->{$id}->{NumAchievedHardcore};
                         $score       = $retprogress->{$id}->{ScoreAchievedHardcore};
@@ -286,27 +260,27 @@ foreach my $user_id ( keys %{$USERS} )
                         $kudos_end   = ' in HARDCORE !';
                         $goodtogo    = 'ok';
 
-                        verbose ( "\t\t\tMarked this game ($id:$JSON->[$X{$id}]->{Title}:$mode) as DONE in DB");
+                        logEntry( "\t\t\tMarked this game ($id:$JSON->[$X{$id}]->{Title}:$mode) as DONE in DB");
                     }
                 }
             }
             if ( $retprogress->{$id}->{ScoreAchieved} > 0 )
             {
-                verbose ( colored("\t== $id:$JSON->[$X{$id}]->{Title}", 'green') );
+                logEntry( colored("\t== $id:$JSON->[$X{$id}]->{Title}", 'green') );
                 if ( $retprogress->{$id}->{NumAchievedHardcore} < $retprogress->{$id}->{NumPossibleAchievements} )
                 {
                     if ( $JSON->[$X{$id}]->{NumAchieved} == $JSON->[$X{$id}]->{NumPossibleAchievements} )
                     {
-                        verbose ( colored("\t\t-> RAB::SQLite::SetGameAsDone($user,$JSON->[$X{$id}]->{GameID},'normal')", 'cyan') );
+                        logEntry( colored("\t\t-> RAB::SQLite::SetGameAsDone($user,$JSON->[$X{$id}]->{GameID},'normal')", 'cyan') );
                         my $done = RAB::SQLite::SetGameAsDone($user,$JSON->[$X{$id}]->{GameID},'normal');
 
                         if ( $done eq 'already_in_db')
                         {
-                            verbose ( "\t\t\tAlready in DB, doing nothing." );
+                            logEntry( "\t\t\tAlready in DB, doing nothing." );
                         }
                         else
                         {
-                            plog ( "STORE $user:$JSON->[$X{$id}]->{GameID}");
+                            logEntry( "STORE $user:$JSON->[$X{$id}]->{GameID}");
 
                             $achieved    = $retprogress->{$id}->{NumAchieved};
                             $score       = $retprogress->{$id}->{ScoreAchieved};
@@ -315,40 +289,59 @@ foreach my $user_id ( keys %{$USERS} )
                             $kudos_end   = ' !';
                             $goodtogo    = 'ok';
 
-                            verbose ( "\t\t\tMarked this game ($id:$JSON->[$X{$id}]->{Title}:$mode) as DONE in DB");
+                            logEntry( "\t\t\tMarked this game ($id:$JSON->[$X{$id}]->{Title}:$mode) as DONE in DB");
                         }
                     }
                     else
                     {
-                        verbose ( "\t\tGame in progress but not completed ($JSON->[$X{$id}]->{NumAchieved}/$JSON->[$X{$id}]->{NumPossibleAchievements})\t=> No tweet" );
+                        logEntry( "\t\tGame in progress but not completed ($JSON->[$X{$id}]->{NumAchieved}/$JSON->[$X{$id}]->{NumPossibleAchievements})\t=> No tweet" );
                     }
                 }
                 else
                 {
-                    verbose ( "\t\tGame already completed in hardcore ($retprogress->{$id}->{NumAchievedHardcore}/$retprogress->{$id}->{NumPossibleAchievements})\t=> No tweet" );
+                    logEntry( "\t\tGame already completed in hardcore ($retprogress->{$id}->{NumAchievedHardcore}/$retprogress->{$id}->{NumPossibleAchievements})\t=> No tweet" );
                 }
             }
 
             if ( $goodtogo and $goodtogo eq 'ok' )
             {
-                verbose ( colored("\t\t-> RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon})", 'cyan') );
+                logEntry( colored("\t\t-> RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon})", 'cyan') );
                 RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon});
-                verbose ( colored("\t\t-> RAB::Sprites::create($user, $JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, $mode, $score, $possible)", 'cyan') );
+                logEntry( colored("\t\t-> RAB::Sprites::create($user, $JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, $mode, $score, $possible)", 'cyan') );
                 RAB::Sprites::create($user, $JSON->[$X{$id}]->{GameID}, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, $mode, $score, $possible);
 
-                verbose ( "\t\tSending tweet about this");
+                logEntry( "\t\tSending tweet about this");
                 $kudos  = "\@$user Kudos, ";
                 $kudos .= "with $achieved/$possible Achievements unlocked, ";
                 $kudos .= "you completed $JSON->[$X{$id}]->{Title} ($JSON->[$X{$id}]->{ConsoleName})[$JSON->[$X{$id}]->{GameID}]";
                 $kudos .= $kudos_end;
 
-                verbose ( colored("\t\t-> RAB::Twitter::FormatTweet($kudos)", 'cyan') );
+                logEntry( colored("\t\t-> RAB::Twitter::FormatTweet($kudos)", 'cyan') );
                 my $tweet = RAB::Twitter::FormatTweet($kudos);
 
-                verbose ( colored("\t\t-> RAB::Twitter::SendTweetMedia(\"$tweet\",\"img/$user/$JSON->[$X{$id}]->{GameID}.png\")", 'cyan') );
-                plog ( "TWEET $user:$JSON->[$X{$id}]->{GameID}");
+                logEntry( colored("\t\t-> RAB::Twitter::SendTweetMedia(\"$tweet\",\"img/$user/$JSON->[$X{$id}]->{GameID}.png\")", 'cyan') );
+                logEntry( "TWEET $user:$JSON->[$X{$id}]->{GameID}");
                 RAB::Twitter::SendTweetMedia($tweet,"img/$user/$JSON->[$X{$id}]->{GameID}.png");
             }
         }
+    }
+}
+
+# add a line to the log file
+sub logEntry {
+    my ($logText) = @_;
+    my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = localtime(time);
+    my $dateTime = sprintf "%4d-%02d-%02d %02d:%02d:%02d |", $year + 1900, $mon + 1, $mday, $hour, $min, $sec;
+    if ($logging) {
+        print LOG "$dateTime $logText\n";
+    }
+}
+
+# do this stuff when exit() is called.
+END {
+    if ($logging)
+    {
+        logEntry("Stopping daemon");
+        close LOG;
     }
 }
