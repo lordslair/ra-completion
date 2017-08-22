@@ -5,8 +5,17 @@ use warnings;
 use lib '/home/ra_bot/lib';
 use RAB::Twitter;
 
-my $DM = RAB::Twitter::Statuses;
-foreach my $user ( sort keys %{$DM} )
+my $DM_ref = RAB::Twitter::Statuses;
+my %DM     = %{$DM_ref};
+
+print "Twitter User         | DM id                | DM content                                         | DM Creation date\n";
+print "====================   ====================   ==================================================   ==============================\n";
+
+foreach my $user ( sort keys %DM )
 {
-    print $user, "\n";
+    foreach my $id ( reverse sort keys %{$DM{$user}{'dm'}} )
+    {
+        printf "%-20s | %20d | %-50s | %30s\n", $user, $id, $DM{$user}{'dm'}{$id}{'text'}, $DM{$user}{'dm'}{$id}{'created_at'};
+        last;
+    }
 }
