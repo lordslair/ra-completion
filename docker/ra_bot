@@ -1,0 +1,112 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+use lib '/home/ra_bot/lib';
+use YAML::Tiny;
+use JSON;
+use RAB::Sprites;
+use RAB::RAAPI;
+use RAB::Twitter;
+use RAB::SQLite;
+
+binmode(STDOUT, ":utf8");
+
+#
+# Variables initialization
+#
+my $twitterfile   = '/home/ra_bot/twitter-config.yaml';
+my $rafile        = '/home/ra_bot/ra-config.yaml';
+
+my $daemonName    = "ra_bot";
+my $logging       = 1;                                     # 1= logging is on
+my $logFilePath   = "/home/ra_bot/log/";                   # log file path
+my $logFile       = $logFilePath . $daemonName . ".log";
+
+# turn on logging
+if ($logging) {
+    open LOG, ">>$logFile";
+    select((select(LOG), $|=1)[0]); # make the log file "hot" - turn off buffering
+}
+
+logEntry("=====");
+logEntry("Starting daemon");
+
+my @twitter_users = RAB::SQLite::GetTwitterUsers;
+my $Mentions = RAB::Twitter::getMentions or die "Failed to getMentions $!";
+
+foreach my $id ( sort keys %{$Mentions} )
+{
+    my $username;
+
+    if ( $Mentions->{$id}{'replied'} )
+    { #We don't do this one
+    }
+    else
+    {
+        if ( $Mentions->{$id}{'text'} =~ m/!(\w*)/ )
+        {
+            logEntry("Got a not yet replied mention ($Mentions->{$id}{'text'})" );
+            $username = $1;
+            logEntry("[$username] Got to reply" );
+
+            if (! grep( /^$username$/, @twitter_users ))
+            {
+                RAB::SQLite::CreateTwitterUser($Mentions->{$id}{'sender_id'},$username,'');
+                logEntry("[$username] Added in DB ($Mentions->{$id}{'sender_id'},$username)");
+            }
+            else
+            {
+                logEntry("[$username] Already in DB ($Mentions->{$id}{'sender_id'},$username)");
+            }
+
+            my $ack = RAB::SQLite::GetAck($username);
+
+            if ( $ack ne 'yes' )
+            {
+                my $user_ra = $1;
+                logEntry( "[$username] -> RAB::RAAPI::GetUserRankAndScore($rafile,$user_ra)" );
+                my $return = RAB::RAAPI::GetUserRankAndScore($rafile,$user_ra);
+
+                if ($return)
+                {
+                    if ( $return eq '{"Score":0,"Rank":"1"}' )
+                    {
+                        logEntry("[$username] '$user_ra' Not registered on RA, or shit happened");
+
+                        if ( $ack eq 'fail' )
+                        {
+                             logEntry("[$username] Already sent fail registration DM. I did nothing.");
+                        }
+                        else
+                        {
+                            my $tweet = "I couldn't find your username '$user_ra' on RA.org. Check it out, and come back to me.";
+                            logEntry( "[$username] -> RAB::Twitter::SendDM($username, $tweet)" );
+#                            RAB::Twitter::SendDM($user, $tweet);
+                            logEntry( "[$username] -> RAB::SQLite::SetAck($username, 'fail')" );
+                            RAB::SQLite::SetAck($username, 'fail');
+                        }
+                    }
+                    else
+                    {
+                        logEntry("[$username] Registered on RA ($user_ra), sending ACK");
+
+                        my $twitter_name =  RAB::Twitter::SenderName($Mentions->{$id}{'sender_id'}) or die "Failed to SenderName $!";
+                        my $text         = "\@" . $twitter_name . " Kudos. You're now associated with the RetroAchievement account : $user_ra";
+                        logEntry("[$username] ->RAB::Twitter::SendTweet($id,'$text')");
+                        RAB::Twitter::SendTweet($id, $text);
+
+                        logEntry("[$username] -> RAB::SQLite::AddRAUser($username,$user_ra)" );
+                        RAB::SQLite::AddRAUser($username,$user_ra);
+                    }
+                }
+            }
+
+
+        }
+    }
+}
+
+logEntry("We're done with twitter requests");
+# Now we're looping only on followers and registered users
+# To fetch data from RA on them
