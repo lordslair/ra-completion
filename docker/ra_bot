@@ -103,14 +103,14 @@ my $USERS = RAB::SQLite::GetRegisteredUsers;
 
 foreach my $user_id ( keys %{$USERS} )
 {
-    my $user    = $USERS->{$user_id}{'user_twitter'};
+    my $user_tw = $USERS->{$user_id}{'user_twitter'};
     my $user_ra = $USERS->{$user_id}{'user_ra'};
 
     my $return = RAB::RAAPI::GetUserRecentlyPlayedGames($rafile,$user_ra);
 
     if ($return)
     {
-        logEntry("[$user:$user_ra] List of recent achievements received");
+        logEntry("[$user_tw:$user_ra] List of recent achievements received");
         my $JSON = decode_json($return);
         my %X;
         my @csv;
@@ -146,7 +146,7 @@ foreach my $user_id ( keys %{$USERS} )
             {
                 if ( $NumAchievedHardcore == $NumPossibleAchievements )
                 {
-                    my $done = RAB::SQLite::SetGameAsDone($user,$GameID,'hardcore');
+                    my $done = RAB::SQLite::SetGameAsDone($user_tw,$GameID,'hardcore');
 
                     if ( $done eq 'already_in_db')
                     { #We don't do this one
@@ -160,7 +160,7 @@ foreach my $user_id ( keys %{$USERS} )
                         $score       = $ScoreAchievedHardcore;
                         $achieved    = $NumAchievedHardcore;
 
-                        logEntry( "[$user:$user_ra]   Marked this game ($id:$GameTitle:$mode) as DONE in DB");
+                        logEntry( "[$user_tw:$user_ra]   Marked this game ($id:$GameTitle:$mode) as DONE in DB");
                     }
                 }
             }
@@ -170,7 +170,7 @@ foreach my $user_id ( keys %{$USERS} )
                 {
                     if ( $NumAchieved == $NumPossibleAchievements )
                     {
-                        my $done = RAB::SQLite::SetGameAsDone($user,$GameID,'normal');
+                        my $done = RAB::SQLite::SetGameAsDone($user_tw,$GameID,'normal');
 
                         if ( $done eq 'already_in_db')
                         { #We don't do this one
@@ -184,7 +184,7 @@ foreach my $user_id ( keys %{$USERS} )
                             $score       = $ScoreAchieved;
                             $achieved    = $NumAchieved;
 
-                            logEntry( "[$user:$user_ra]   Marked this game ($id:$GameTitle:$mode) as DONE in DB");
+                            logEntry( "[$user_tw:$user_ra]   Marked this game ($id:$GameTitle:$mode) as DONE in DB");
                         }
                     }
                     else
@@ -199,16 +199,16 @@ foreach my $user_id ( keys %{$USERS} )
             if ( $goodtogo and $goodtogo eq 'ok' )
             {
                 RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon});
-                RAB::Sprites::create($user, $GameID, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, $mode, $ScoreAchieved, $NumPossibleAchievements);
+                RAB::Sprites::create($user_tw, $GameID, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, $mode, $ScoreAchieved, $NumPossibleAchievements);
 
-                logEntry( "[$user:$user_ra]     Sending tweet about this");
-                my $kudos  = "\@$user Kudos, ";
+                logEntry( "[$user_tw:$user_ra]     Sending tweet about this");
+                my $kudos  = "\@$user_tw Kudos, ";
                    $kudos .= "with $achieved/$NumPossibleAchievements Achievements unlocked, ";
                    $kudos .= "you completed $GameTitle ($JSON->[$X{$id}]->{ConsoleName})[$GameID]";
                    $kudos .= $kudos_end;
                 my $tweet = RAB::Twitter::FormatTweet($kudos);
 
-                RAB::Twitter::SendTweetMedia($tweet,"img/$user/$GameID.png");
+                RAB::Twitter::SendTweetMedia($tweet,"img/$user_tw/$GameID.png");
             }
         }
     }
