@@ -3,7 +3,6 @@ use strict;
 use warnings;
 
 use lib '/home/ra_bot/lib';
-use YAML::Tiny;
 use JSON;
 use RAB::Sprites;
 use RAB::RAAPI;
