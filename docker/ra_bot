@@ -33,7 +33,7 @@ logEntry("=====");
 logEntry("Starting daemon");
 
 my @twitter_users = RAB::SQLite::GetTwitterUsers;
-my $Mentions = RAB::Twitter::getMentions or die "Failed to getMentions $!";
+my $Mentions      = RAB::Twitter::getMentions or die "Failed to getMentions $!";
 
 foreach my $id ( sort keys %{$Mentions} )
 {
@@ -65,7 +65,6 @@ foreach my $id ( sort keys %{$Mentions} )
             if ( $ack ne 'yes' )
             {
                 my $user_ra = $1;
-                logEntry( "[$username] -> RAB::RAAPI::GetUserRankAndScore($rafile,$user_ra)" );
                 my $return = RAB::RAAPI::GetUserRankAndScore($rafile,$user_ra);
 
                 if ($return)
@@ -81,22 +80,19 @@ foreach my $id ( sort keys %{$Mentions} )
                         else
                         {
                             my $tweet = "I couldn't find your username '$user_ra' on RA.org. Check it out, and come back to me.";
-                            logEntry( "[$username] -> RAB::Twitter::SendDM($username, $tweet)" );
-#                            RAB::Twitter::SendDM($user, $tweet);
-                            logEntry( "[$username] -> RAB::SQLite::SetAck($username, 'fail')" );
+
+                            RAB::Twitter::SendTweet($id, $tweet);
                             RAB::SQLite::SetAck($username, 'fail');
                         }
                     }
                     else
                     {
-                        logEntry("[$username] Registered on RA ($user_ra), sending ACK");
+                        logEntry("[$username] Registered on RA ($user_ra), sending ACK Tweet");
 
                         my $twitter_name =  RAB::Twitter::SenderName($Mentions->{$id}{'sender_id'}) or die "Failed to SenderName $!";
                         my $text         = "\@" . $twitter_name . " Kudos. You're now associated with the RetroAchievement account : $user_ra";
-                        logEntry("[$username] ->RAB::Twitter::SendTweet($id,'$text')");
-                        RAB::Twitter::SendTweet($id, $text);
 
-                        logEntry("[$username] -> RAB::SQLite::AddRAUser($username,$user_ra)" );
+                        RAB::Twitter::SendTweet($id, $text);
                         RAB::SQLite::AddRAUser($username,$user_ra);
                     }
                 }
@@ -107,6 +103,136 @@ foreach my $id ( sort keys %{$Mentions} )
     }
 }
 
-logEntry("We're done with twitter requests");
-# Now we're looping only on followers and registered users
-# To fetch data from RA on them
+my $USERS = RAB::SQLite::GetRegisteredUsers;
+
+foreach my $user_id ( keys %{$USERS} )
+{
+    my $user    = $USERS->{$user_id}{'user_twitter'};
+    my $user_ra = $USERS->{$user_id}{'user_ra'};
+
+    my $return = RAB::RAAPI::GetUserRecentlyPlayedGames($rafile,$user_ra);
+
+    if ($return)
+    {
+        logEntry("[$user:$user_ra] List of recent achievements received");
+        my $JSON = decode_json($return);
+        my %X;
+        my @csv;
+
+        my $max = scalar @{$JSON}; # Because I'm not sure I'll receive 10 last played games
+        for (my $i = 0; $i < $max; $i++) # And we loop
+        {
+            push @csv, $JSON->[$i]->{GameID};
+            $X{$JSON->[$i]->{GameID}} = $i;
+        }
+
+        my $retprogress = RAB::RAAPI::GetUserProgress($rafile,$user_ra,\@csv);
+
+        foreach my $id ( keys %{$retprogress} )
+        {
+            my $kudos_end;
+            my $goodtogo;
+            my $achieved;
+            my $score;
+            my $mode;
+            my $gamePercent;
+
+            my $NumPossibleAchievements = $retprogress->{$id}->{NumPossibleAchievements};
+            my $ScoreAchievedHardcore   = $retprogress->{$id}->{ScoreAchievedHardcore};
+            my $NumAchievedHardcore     = $retprogress->{$id}->{NumAchievedHardcore};
+            my $ScoreAchieved           = $retprogress->{$id}->{ScoreAchieved};
+            my $NumAchieved             = $retprogress->{$id}->{NumAchieved};
+
+            my $GameTitle               = $JSON->[$X{$id}]->{Title};
+            my $GameID                  = $JSON->[$X{$id}]->{GameID};
+
+            if ( $ScoreAchievedHardcore > 0 )
+            {
+                if ( $NumAchievedHardcore == $NumPossibleAchievements )
+                {
+                    my $done = RAB::SQLite::SetGameAsDone($user,$GameID,'hardcore');
+
+                    if ( $done eq 'already_in_db')
+                    { #We don't do this one
+                    }
+                    else
+                    {
+                        $mode        = 'hardcore';
+                        $gamePercent = sprintf("%.0f", 100*$NumAchievedHardcore/$NumPossibleAchievements);
+                        $kudos_end   = ' in HARDCORE !';
+                        $goodtogo    = 'ok';
+                        $score       = $ScoreAchievedHardcore;
+                        $achieved    = $NumAchievedHardcore;
+
+                        logEntry( "[$user:$user_ra]   Marked this game ($id:$GameTitle:$mode) as DONE in DB");
+                    }
+                }
+            }
+            if ( $ScoreAchieved > 0 )
+            {
+                if ( $NumAchievedHardcore < $NumPossibleAchievements )
+                {
+                    if ( $NumAchieved == $NumPossibleAchievements )
+                    {
+                        my $done = RAB::SQLite::SetGameAsDone($user,$GameID,'normal');
+
+                        if ( $done eq 'already_in_db')
+                        { #We don't do this one
+                        }
+                        else
+                        {
+                            $mode        = 'normal';
+                            $gamePercent = sprintf("%.0f", 100*$NumAchieved/$NumPossibleAchievements);
+                            $kudos_end   = ' !';
+                            $goodtogo    = 'ok';
+                            $score       = $ScoreAchieved;
+                            $achieved    = $NumAchieved;
+
+                            logEntry( "[$user:$user_ra]   Marked this game ($id:$GameTitle:$mode) as DONE in DB");
+                        }
+                    }
+                    else
+                    { # Game not finished, then no tweet
+                    }
+                }
+                else
+                { # Game already completed in hardcore
+                }
+            }
+
+            if ( $goodtogo and $goodtogo eq 'ok' )
+            {
+                RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon});
+                RAB::Sprites::create($user, $GameID, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, $mode, $ScoreAchieved, $NumPossibleAchievements);
+
+                logEntry( "[$user:$user_ra]     Sending tweet about this");
+                my $kudos  = "\@$user Kudos, ";
+                   $kudos .= "with $achieved/$NumPossibleAchievements Achievements unlocked, ";
+                   $kudos .= "you completed $GameTitle ($JSON->[$X{$id}]->{ConsoleName})[$GameID]";
+                   $kudos .= $kudos_end;
+                my $tweet = RAB::Twitter::FormatTweet($kudos);
+
+                RAB::Twitter::SendTweetMedia($tweet,"img/$user/$GameID.png");
+            }
+        }
+    }
+}
+
+# add a line to the log file
+sub logEntry {
+    my ($logText) = @_;
+    my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = localtime(time);
+    my $dateTime = sprintf "%4d-%02d-%02d %02d:%02d:%02d |", $year + 1900, $mon + 1, $mday, $hour, $min, $sec;
+    if ($logging) {
+        print LOG "$dateTime $logText\n";
+    }
+}
+
+# do this stuff when exit() is called.
+END {
+    if ($logging)
+    {
+        logEntry("Stopping daemon");
+        close LOG;
+    }
+}
