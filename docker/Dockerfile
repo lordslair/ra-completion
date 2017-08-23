@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     libimage-magick-perl \
     libnet-twitter-lite-perl \
     libwww-perl \
+    libyaml-tiny-perl \
 && rm -rf /var/lib/apt/lists/*
 
 RUN useradd --create-home --shell /bin/bash ra_bot
