@@ -110,7 +110,6 @@ foreach my $user_id ( keys %{$USERS} )
 
     if ($return)
     {
-        logEntry("[$user_tw:$user_ra] List of recent achievements received");
         my $JSON = decode_json($return);
         my %X;
         my @csv;
