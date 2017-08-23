@@ -28,7 +28,7 @@ sub CreateTwitterUser
     my $id   = shift;
     my $user = shift;
     my $help = shift;
-    my $sth  = $dbh->prepare( "INSERT INTO Users VALUES('$id','$user','','','$help','','');");
+    my $sth  = $dbh->prepare( "INSERT INTO Users VALUES('$id','$user','','no','$help','','');");
     $sth->execute();
     $sth->finish();
 }
