@@ -19,7 +19,7 @@ COPY lib/  /home/ra_bot/lib/
 COPY tmp/  /home/ra_bot/tmp/
 COPY test/ /home/ra_bot/test/
 
-COPY lib-twitter.pl      /home/ra_bot/
+COPY ra_bot      /home/ra_bot/
 
 COPY twitter-config.yaml /home/ra_bot/
 COPY ra-config.yaml      /home/ra_bot/
