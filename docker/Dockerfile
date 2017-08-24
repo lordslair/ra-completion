@@ -17,7 +17,6 @@ COPY bashrc.user /home/ra_bot/.bashrc
 
 COPY lib/  /home/ra_bot/lib/
 COPY tmp/  /home/ra_bot/tmp/
-COPY bin/  /home/ra_bot/bin/
 COPY test/ /home/ra_bot/test/
 
 COPY lib-twitter.pl      /home/ra_bot/
