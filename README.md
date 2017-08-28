@@ -27,7 +27,7 @@ They are located in /test/ folder.
 ├── test                              |  Bunch of test scripts
 ├── twitter-config.yaml               |  Twitter credentials
 ├── ra-config.yaml                    |  RA.org  credentials
-└── ra_bot                            |  Main script, lthe Docker endpoint wo does all the work
+└── ra_bot                            |  Main script, lthe Docker endpoint who does all the work
 ```
 
 ### Tech
@@ -66,7 +66,7 @@ docker run --name ra_bot -d lordslair/ra_bot
 
 >As there's only one script running, it's not wrapped in a start.sh-like script.  
 >There's proably **NULL** interest for anyone to clone it and run the script this way, though.  
->(It's currently hardcoded to use @ra_bot Twitter account I registered)  
+>(It's currently hardcoded to use @ra_completion Twitter account I registered)  
 >I put the code here mostly for reminder, and to help anyone if they find parts of it useful for their own dev.
 
 ### Result
@@ -74,7 +74,7 @@ docker run --name ra_bot -d lordslair/ra_bot
 ### Todos
 
  - Different backgrounds for softcore/HARDCORE
- - lighter container (empty it weights ~175M)
+ - lighter container (empty it weights ~225M)
  - logs accessible from outside the container (docker logs stuff)
  - /data accessible from outside the container (docker volume stuff)
 
