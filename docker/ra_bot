@@ -51,26 +51,26 @@ foreach my $id ( sort keys %{$Mentions} )
             logEntry("[\@$user_tw] Got to reply" );
 
             if (! grep( /^$user_tw$/, @twitter_users ))
-            {
+            {   
                 RAB::SQLite::CreateTwitterUser($Mentions->{$id}{'sender_id'},$user_tw,'');
                 logEntry("[\@$user_tw] Added in DB ($Mentions->{$id}{'sender_id'},$user_tw)");
             }
             else
-            {
+            {   
                 logEntry("[\@$user_tw] Already in DB ($Mentions->{$id}{'sender_id'},\@$user_tw)");
             }
 
             my $ack = RAB::SQLite::GetAck("$user_tw") or die "[\@$user_tw] Failed to GetAck $!";
 
             if ( $ack ne 'yes' )
-            {
+            {   
                 my $user_ra = $username;
                 my $return  = RAB::RAAPI::GetUserRankAndScore($rafile,$user_ra);
 
                 if ($return)
-                {
+                {   
                     if ( $return eq '{"Score":0,"Rank":"1"}' )
-                    {
+                    {   
                         logEntry("[\@$user_tw] '$user_ra' Not registered on RA, or shit happened");
 
                         if ( $ack eq 'fail' )
@@ -78,7 +78,7 @@ foreach my $id ( sort keys %{$Mentions} )
                              logEntry("[\@$user_tw] Already sent fail registration DM. I did nothing.");
                         }
                         else
-                        {
+                        {   
                             my $tweet = "I couldn't find your username '$user_ra' on RA.org. Check it out, and come back to me.";
 
                             RAB::Twitter::SendTweet($id, $tweet);
@@ -160,7 +160,7 @@ foreach my $user_id ( keys %{$USERS} )
                         $score       = $ScoreAchievedHardcore;
                         $achieved    = $NumAchievedHardcore;
 
-                        logEntry( "[$user_tw:$user_ra]   Marked this game ($id:$GameTitle:$mode) as DONE in DB");
+                        logEntry( "[\@$user_tw:$user_ra]   Marked this game ($id:$GameTitle:$mode) as DONE in DB");
                     }
                 }
             }
@@ -184,7 +184,7 @@ foreach my $user_id ( keys %{$USERS} )
                             $score       = $ScoreAchieved;
                             $achieved    = $NumAchieved;
 
-                            logEntry( "[$user_tw:$user_ra]   Marked this game ($id:$GameTitle:$mode) as DONE in DB");
+                            logEntry( "[\@$user_tw:$user_ra]   Marked this game ($id:$GameTitle:$mode) as DONE in DB");
                         }
                     }
                     else
@@ -201,14 +201,14 @@ foreach my $user_id ( keys %{$USERS} )
                 RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon});
                 RAB::Sprites::create($user_tw, $GameID, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, $mode, $ScoreAchieved, $NumPossibleAchievements);
 
-                logEntry( "[$user_tw:$user_ra]     Sending tweet about this");
+                logEntry( "[\@$user_tw:$user_ra]     Sending tweet about this");
                 my $kudos  = "\@$user_tw Kudos, ";
                    $kudos .= "with $achieved/$NumPossibleAchievements Achievements unlocked, ";
                    $kudos .= "you completed $GameTitle ($JSON->[$X{$id}]->{ConsoleName})[$GameID]";
                    $kudos .= $kudos_end;
                 my $tweet = RAB::Twitter::FormatTweet($kudos);
 
-                RAB::Twitter::SendTweetMedia($tweet,"img/$user_tw/$GameID.png");
+		RAB::Twitter::SendTweetMedia($tweet,"img/$user_tw/$GameID.png");
             }
         }
     }
