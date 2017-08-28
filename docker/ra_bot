@@ -2,6 +2,7 @@
 use strict;
 use warnings;
 
+use File::Pid;
 use JSON;
 
 use lib '/home/ra_bot/lib';
@@ -19,9 +20,28 @@ my $twitterfile   = '/home/ra_bot/twitter-config.yaml';
 my $rafile        = '/home/ra_bot/ra-config.yaml';
 
 my $daemonName    = "ra_bot";
+my $dieNow        = 0;                                     # used for "infinte loop" construct - allows daemon mode to gracefully exit
+my $sleepMainLoop = 60;                                    # number of seconds to wait between "do something" execution after queue is clear
 my $logging       = 1;                                     # 1= logging is on
 my $logFilePath   = "/home/ra_bot/log/";                   # log file path
 my $logFile       = $logFilePath . $daemonName . ".log";
+my $pidFilePath   = "/var/run/";                           # PID file path
+my $pidFile       = $pidFilePath . $daemonName . ".pid";
+
+# daemonize
+chdir '/';
+umask 0;
+open STDIN,  '/dev/null'   or die "Can't read /dev/null: $!";
+open STDOUT, '>>/dev/null' or die "Can't write to /dev/null: $!";
+open STDERR, '>>/dev/null' or die "Can't write to /dev/null: $!";
+
+# callback signal handler for signals.
+$SIG{INT} = $SIG{TERM} = $SIG{HUP} = \&signalHandler;
+$SIG{PIPE} = 'ignore';
+
+# create pid file in /var/run/
+my $pidfile = File::Pid->new( { file => $pidFile, } );
+   $pidfile->write or die "Can't write PID file, /dev/null: $!";
 
 # turn on logging
 if ($logging) {
@@ -31,6 +51,15 @@ if ($logging) {
 
 logEntry("=====");
 logEntry("Starting daemon");
+
+my $loop;
+# "infinite" loop where some useful process happens
+until ($dieNow) {
+    sleep($sleepMainLoop);
+
+    $loop++;
+    logEntry(":o) Entering loop $loop");
+
 
 my @twitter_users = RAB::SQLite::GetTwitterUsers;
 my $Mentions      = RAB::Twitter::getMentions or die "Failed to getMentions $!";
@@ -213,6 +242,7 @@ foreach my $user_id ( keys %{$USERS} )
         }
     }
 }
+}
 
 # add a line to the log file
 sub logEntry {
@@ -222,6 +252,12 @@ sub logEntry {
     if ($logging) {
         print LOG "$dateTime $logText\n";
     }
+}
+
+# catch signals and end the program if one is caught.
+sub signalHandler {
+    logEntry("Stop signal caught");
+    $dieNow = 1;    # this will cause the "infinite loop" to exit
 }
 
 # do this stuff when exit() is called.
