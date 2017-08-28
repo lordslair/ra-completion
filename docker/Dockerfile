@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     libnet-twitter-lite-perl \
     libwww-perl \
     libyaml-tiny-perl \
+    libfile-pid-perl \
 && rm -rf /var/lib/apt/lists/*
 
 RUN useradd --create-home --shell /bin/bash ra_bot
