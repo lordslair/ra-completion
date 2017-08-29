@@ -27,3 +27,4 @@ COPY twitter-config.yaml /home/ra_bot/
 COPY ra-config.yaml      /home/ra_bot/
 
 RUN chown -R ra_bot:ra_bot /home/ra_bot
+RUN /home/ra_bot/test/initDB.pl
