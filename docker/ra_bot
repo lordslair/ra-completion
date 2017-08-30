@@ -60,7 +60,6 @@ until ($dieNow) {
     $loop++;
     logEntry(":o) Entering loop $loop");
 
-
     my @twitter_users = RAB::SQLite::GetTwitterUsers;
     my $Mentions      = RAB::Twitter::getMentions or die "Failed to getMentions $!";
 
