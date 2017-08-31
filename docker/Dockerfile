@@ -19,7 +19,6 @@ COPY bashrc.user /home/ra_bot/.bashrc
 COPY lib/  /home/ra_bot/lib/
 COPY tmp/  /home/ra_bot/tmp/
 COPY test/ /home/ra_bot/test/
-COPY log   /home/ra_bot/log/
 
 COPY ra_bot      /home/ra_bot/
 
