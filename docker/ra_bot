@@ -237,6 +237,7 @@ until ($dieNow) {
                     my $tweet = RAB::Twitter::FormatTweet($kudos);
 
                     RAB::Twitter::SendTweetMedia($tweet,"img/$user_tw/$GameID.png");
+                    logEntry( "[\@$user_tw:$user_ra]     img/$user_tw/$GameID.png");
                 }
             }
         }
@@ -256,7 +257,7 @@ sub logEntry {
 # catch signals and end the program if one is caught.
 sub signalHandler {
     open DATA, "/home/ra_bot/test/getTwitterRateLimit.pl |" or die "Couldn't execute program: $!";
-        while ( defined( my $line = <DATA> )  ) 
+        while ( defined( my $line = <DATA> )  )
         {
             chomp($line);
             logEntry($line);
