@@ -236,8 +236,8 @@ until ($dieNow) {
                        $kudos .= $kudos_end;
                     my $tweet = RAB::Twitter::FormatTweet($kudos);
 
-                    RAB::Twitter::SendTweetMedia($tweet,"img/$user_tw/$GameID.png");
-                    logEntry( "[\@$user_tw:$user_ra]     img/$user_tw/$GameID.png");
+                    RAB::Twitter::SendTweetMedia($tweet,"/home/ra_bot/img/$user_tw/$GameID.png") or die "Failed to SendTweetMedia $!";
+                    logEntry( "[\@$user_tw:$user_ra]     /home/ra_bot/img/$user_tw/$GameID.png");
                 }
             }
         }
