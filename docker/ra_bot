@@ -23,8 +23,6 @@ my $daemonName    = "ra_bot";
 my $dieNow        = 0;                                     # used for "infinte loop" construct - allows daemon mode to gracefully exit
 my $sleepMainLoop = 300;                                   # number of seconds to wait between "do something" execution after queue is clear
 my $logging       = 1;                                     # 1= logging is on
-my $logFilePath   = "/home/ra_bot/log/";                   # log file path
-my $logFile       = $logFilePath . $daemonName . ".log";
 my $pidFilePath   = "/var/run/";                           # PID file path
 my $pidFile       = $pidFilePath . $daemonName . ".pid";
 
