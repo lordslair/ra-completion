@@ -5,10 +5,10 @@ use Image::Magick;
 #
 # Variables initialization
 #
-my $logfile       = './lib-twitter.log';
-my $tmpfolder     = './tmp';
-my $finalfolder   = './img';
-my $spritesfolder = './lib/RAB/Sprites';
+my $basefolder    = '/home/ra_bot';
+my $tmpfolder     = $basefolder . '/tmp';
+my $finalfolder   = $basefolder . '/img';
+my $spritesfolder = $basefolder . '/lib/RAB/Sprites';
 
 if ( ! -d "$tmpfolder"   ) { mkdir "$tmpfolder"   }
 if ( ! -d "$finalfolder" ) { mkdir "$finalfolder" }
