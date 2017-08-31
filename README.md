@@ -45,7 +45,8 @@ And of course GitHub to store all these shenanigans.
 
 ### Installation
 
-The script is aimed to run in a Docker container. Could work without it, but more practical this way.
+The script is aimed to run in a Docker container. Could work without it, but more practical this way.  
+
 ```
 git clone https://github.com/lordslair/ra_bot
 cd ra_bot
@@ -60,6 +61,12 @@ lordslair/ra_bot        latest              9e50ff067b1a        225 MB
 
 ```
 docker run --name ra_bot -d lordslair/ra_bot
+```
+
+```
+docker ps
+IMAGE               COMMAND                 CREATED             STATUS              NAMES
+lordslair/ra_bot    "/home/ra_bot/ra_bot"   18 hours ago        Up 18 hours         ra_bot
 ```
 
 #### Disclaimer/Reminder
