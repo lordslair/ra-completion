@@ -31,9 +31,6 @@ my $pidFile       = $pidFilePath . $daemonName . ".pid";
 # daemonize
 chdir '/';
 umask 0;
-open STDIN,  '/dev/null'   or die "Can't read /dev/null: $!";
-open STDOUT, '>>/dev/null' or die "Can't write to /dev/null: $!";
-open STDERR, '>>/dev/null' or die "Can't write to /dev/null: $!";
 
 # callback signal handler for signals.
 $SIG{INT} = $SIG{TERM} = $SIG{HUP} = \&signalHandler;
@@ -42,12 +39,6 @@ $SIG{PIPE} = 'ignore';
 # create pid file in /var/run/
 my $pidfile = File::Pid->new( { file => $pidFile, } );
    $pidfile->write or die "Can't write PID file, /dev/null: $!";
-
-# turn on logging
-if ($logging) {
-    open LOG, ">>$logFile";
-    select((select(LOG), $|=1)[0]); # make the log file "hot" - turn off buffering
-}
 
 logEntry("=====");
 logEntry("Starting daemon");
@@ -250,7 +241,7 @@ sub logEntry {
     my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = localtime(time);
     my $dateTime = sprintf "%4d-%02d-%02d %02d:%02d:%02d |", $year + 1900, $mon + 1, $mday, $hour, $min, $sec;
     if ($logging) {
-        print LOG "$dateTime $logText\n";
+        print STDERR "$dateTime $logText\n";
     }
 }
 
@@ -272,6 +263,5 @@ END {
     if ($logging)
     {
         logEntry("Stopping daemon");
-        close LOG;
     }
 }
