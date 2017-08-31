@@ -18,6 +18,7 @@ They are located in /test/ folder.
 
 ```
 ├── Dockerfile                        |  To build the docker container
+├── img                               |  Contains generated PNG sent to Twitter
 ├── lib
 │   ├── RAB
 │   │   ├── SQLite.pm                 |  RAB::SQLite     to interact with SQL3 DB
@@ -25,6 +26,7 @@ They are located in /test/ folder.
 │   │   └── Untappd.pm                |  RAB::RAAPI      to fetch data from RA.org API
 ├── log
 ├── test                              |  Bunch of test scripts
+├── tmp                               |  Contains GameIcons
 ├── twitter-config.yaml               |  Twitter credentials
 ├── ra-config.yaml                    |  RA.org  credentials
 └── ra_bot                            |  Main script, lthe Docker endpoint who does all the work
@@ -80,7 +82,10 @@ lordslair/ra_bot    "/home/ra_bot/ra_bot"   18 hours ago        Up 18 hours     
 
 These are the PNG generated and sent, respectfully in Normal and Hardcore mode.  
 ![119][119-Normal]
-![6494][6494-Hardcore]
+![6494][6494-Hardcore]  
+
+And here is the result when sent to Twitter.  
+![330][330-Twitter]
 
 ### Todos
 
@@ -100,3 +105,4 @@ These are the PNG generated and sent, respectfully in Normal and Hardcore mode.
 
    [119-Normal]: <https://raw.githubusercontent.com/lordslair/ra_bot/master/Screenshot-119-Normal.png>
    [6494-Hardcore]: <https://raw.githubusercontent.com/lordslair/ra_bot/master/Screenshot-6494-Hardcore.png>
+   [330-Twitter]: <https://raw.githubusercontent.com/lordslair/ra_bot/master/Screenshot-330-Twitter.png>
