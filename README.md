@@ -98,5 +98,5 @@ These are the PNG generated and sent, respectfully in Normal and Hardcore mode.
    [CPANIM]: <http://search.cpan.org/~jcristy/PerlMagick-6.89-1/Magick.pm>
    [daemon]: <http://www.andrewault.net/2010/05/27/creating-a-perl-daemon-in-ubuntu/>
 
-   [119-Normal]: <<https://raw.githubusercontent.com/lordslair/ra_bot/Screenshot-119-Normal.png>
-   [6494-Hardcore]: <<https://raw.githubusercontent.com/lordslair/ra_bot/Screenshot-6494-Hardcore.png>
+   [119-Normal]: <https://raw.githubusercontent.com/lordslair/ra_bot/master/Screenshot-119-Normal.png>
+   [6494-Hardcore]: <https://raw.githubusercontent.com/lordslair/ra_bot/master/Screenshot-6494-Hardcore.png>
