@@ -78,6 +78,9 @@ lordslair/ra_bot    "/home/ra_bot/ra_bot"   18 hours ago        Up 18 hours     
 
 ### Result
 
+These are the PNG generated and sent, respectfully in Normal and Hardcore mode.  
+![119][119-Normal]![6494][6494-Hardcore]
+
 ### Todos
 
  - Different backgrounds for softcore/HARDCORE
@@ -93,3 +96,6 @@ lordslair/ra_bot    "/home/ra_bot/ra_bot"   18 hours ago        Up 18 hours     
    [CPANTwitt]: <http://search.cpan.org/~mmims/Net-Twitter-Lite-0.12008/lib/Net/Twitter/Lite/WithAPIv1_1.pod>
    [CPANIM]: <http://search.cpan.org/~jcristy/PerlMagick-6.89-1/Magick.pm>
    [daemon]: <http://www.andrewault.net/2010/05/27/creating-a-perl-daemon-in-ubuntu/>
+
+   [119-Normal]: <<https://raw.githubusercontent.com/lordslair/ra_bot/Screenshot-119-Normal.png>
+   [6494-Hardcore]: <<https://raw.githubusercontent.com/lordslair/ra_bot/Screenshot-6494-Hardcore.png>
