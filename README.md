@@ -79,7 +79,8 @@ lordslair/ra_bot    "/home/ra_bot/ra_bot"   18 hours ago        Up 18 hours     
 ### Result
 
 These are the PNG generated and sent, respectfully in Normal and Hardcore mode.  
-![119][119-Normal]![6494][6494-Hardcore]
+![119][119-Normal]
+![6494][6494-Hardcore]
 
 ### Todos
 
