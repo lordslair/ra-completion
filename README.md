@@ -20,11 +20,10 @@ They are located in /test/ folder.
 ├── Dockerfile                        |  To build the docker container
 ├── img                               |  Contains generated PNG sent to Twitter
 ├── lib
-│   ├── RAB
-│   │   ├── SQLite.pm                 |  RAB::SQLite     to interact with SQL3 DB
-│   │   ├── Twitter.pm                |  RAB::Twitter    to check mentions, and reply
-│   │   └── Untappd.pm                |  RAB::RAAPI      to fetch data from RA.org API
-├── log
+│   └── RAB
+│       ├── SQLite.pm                 |  RAB::SQLite     to interact with SQL3 DB
+│       ├── Twitter.pm                |  RAB::Twitter    to check mentions, and reply
+│       └── Untappd.pm                |  RAB::RAAPI      to fetch data from RA.org API
 ├── test                              |  Bunch of test scripts
 ├── tmp                               |  Contains GameIcons
 ├── twitter-config.yaml               |  Twitter credentials
@@ -71,6 +70,23 @@ IMAGE               COMMAND                 CREATED             STATUS          
 lordslair/ra_bot    "/home/ra_bot/ra_bot"   18 hours ago        Up 18 hours         ra_bot
 ```
 
+```
+docker logs ra_bot
+2017-08-31 15:22:43 | =====
+2017-08-31 15:22:43 | Starting daemon
+2017-08-31 15:23:43 | :o) Entering loop 1
+2017-08-31 15:24:45 | Got a not yet replied mention from @Lordslair (@ra_completion !Lordslair)
+2017-08-31 15:24:45 | [@Lordslair] Got to reply
+2017-08-31 15:24:45 | [@Lordslair] Added in DB (440766852,Lordslair)
+2017-08-31 15:24:45 | [@Lordslair] Registered on RA (Lordslair), sending ACK Tweet
+2017-08-31 15:24:46 | [@Lordslair:Lordslair]   Marked this game (113:Hellfire:normal) as DONE in DB
+2017-08-31 15:24:46 | [@Lordslair:Lordslair]     Sending tweet about this
+2017-08-31 15:24:47 | [@Lordslair:Lordslair]     /home/ra_bot/img/Lordslair/113.png
+2017-08-31 15:24:47 | [@Lordslair:Lordslair]   Marked this game (330:Gynoug:normal) as DONE in DB
+2017-08-31 15:24:47 | [@Lordslair:Lordslair]     Sending tweet about this
+2017-08-31 15:24:48 | [@Lordslair:Lordslair]     /home/ra_bot/img/Lordslair/330.png
+```  
+
 #### Disclaimer/Reminder
 
 >As there's only one script running, it's not wrapped in a start.sh-like script.  
@@ -91,7 +107,7 @@ And here is the result when sent to Twitter.
 
  - Different backgrounds for softcore/HARDCORE
  - lighter container (empty it weights ~225M)
- - logs accessible from outside the container (docker logs stuff)
+ - ~~logs accessible from outside the container (docker logs stuff)~~
  - /data accessible from outside the container (docker volume stuff)
 
 ### Useful stuff
