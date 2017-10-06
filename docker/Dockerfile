@@ -1,15 +1,17 @@
 FROM debian:stretch-slim
 MAINTAINER @Lordslair
 
-RUN apt-get update && apt-get install -y \
-    libdbd-sqlite3-perl \
-    libdbi-perl \
-    libimage-magick-perl \
-    libnet-twitter-lite-perl \
-    libwww-perl \
-    libyaml-tiny-perl \
-    libfile-pid-perl \
-&& rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && apt-get install -y \
+       libdbd-sqlite3-perl \
+       libdbi-perl \
+       libimage-magick-perl \
+       libnet-twitter-lite-perl \
+       libwww-perl \
+       libyaml-tiny-perl \
+       libfile-pid-perl \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN useradd --create-home --shell /bin/bash ra_bot
 
