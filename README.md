@@ -13,7 +13,7 @@ Actually, as 1.0, it works this way, as soon as you send your RA username to the
 
 ### Which script does what ?
 
-I added multiples test scripts as I was coding this to help me, ant test almost every function independantly.  
+I added multiples test scripts as I was coding this to help me, and test almost every function independantly.  
 They are located in /test/ folder.
 
 ```
