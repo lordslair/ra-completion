@@ -28,7 +28,7 @@ They are located in /test/ folder.
 ├── tmp                               |  Contains GameIcons
 ├── twitter-config.yaml               |  Twitter credentials
 ├── ra-config.yaml                    |  RA.org  credentials
-└── ra_bot                            |  Main script, lthe Docker endpoint who does all the work
+└── ra_bot                            |  Main script, the Docker endpoint who does all the work
 ```
 
 ### Tech
