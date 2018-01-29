@@ -73,6 +73,7 @@ sub SenderName
 sub Statuses
 {
     my $lastmsg_id  = $twitter->direct_messages({ count => 1 });
+    my %DM;
     while ( )
     {   
         my $statuses    = $twitter->direct_messages({ max_id => $lastmsg_id, count => 20 });
@@ -130,6 +131,13 @@ sub SendTweet
     my $text   = shift;
 
     my $update = $twitter->update({ in_reply_to_status_id => $id, status => $text });
+}
+
+sub getFollowersID
+{
+    my $followers_list = $twitter->followers_ids({screen_name => 'ra_completion'});
+
+    return \@{$followers_list->{ids}}
 }
 
 1;
