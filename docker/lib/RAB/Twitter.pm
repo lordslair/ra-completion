@@ -140,4 +140,21 @@ sub getFollowersID
     return \@{$followers_list->{ids}}
 }
 
+sub getFollowers
+{
+    my $followers_list_ref = $twitter->followers_list({screen_name => 'ra_completion'});
+
+    my %followers_list     = %{$followers_list_ref};
+    my @followers_users    = $followers_list{'users'};
+
+    my @followers_data     = @{$followers_users[0]};
+    my @followers;
+
+    foreach my $follower (@followers_data)
+    {
+        push @followers, $follower->{'screen_name'};
+    }
+    return \@followers;
+}
+
 1;
