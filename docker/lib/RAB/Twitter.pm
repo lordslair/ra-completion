@@ -1,11 +1,15 @@
 package RAB::Twitter;
 
+use strict;
+use warnings;
+
 use Net::Twitter::Lite::WithAPIv1_1;
 use YAML::Tiny;
 
 #
 # Variables initialization
 #
+
 my $twitterfile = '/home/ra_bot/twitter-config.yaml';
 my $twittyaml = YAML::Tiny->read( $twitterfile );
 my $twitter = Net::Twitter::Lite::WithAPIv1_1->new(
