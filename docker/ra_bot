@@ -54,10 +54,11 @@ until ($dieNow) {
     logEntry("$EMOJIok Entering loop $loop");
 
     my @twitter_users = RAB::SQLite::GetTwitterUsers;
+    my $Mentions;
 
     eval
     {
-        my $Mentions      = RAB::Twitter::getMentions or die "Failed to getMentions $!";
+        $Mentions = RAB::Twitter::getMentions or die "Failed to getMentions $!";
         1;
     } or do {
         my $error = $@ || 'Unknown failure';
