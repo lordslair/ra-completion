@@ -50,7 +50,17 @@ until ($dieNow) {
     logEntry(":o) Entering loop $loop");
 
     my @twitter_users = RAB::SQLite::GetTwitterUsers;
-    my $Mentions      = RAB::Twitter::getMentions or die "Failed to getMentions $!";
+
+    eval
+    {
+        my $Mentions      = RAB::Twitter::getMentions or die "Failed to getMentions $!";
+        1;
+    } or do {
+        my $error = $@ || 'Unknown failure';
+        chomp ($error);
+        logEntry(":o( ERROR: $error");
+        next;
+    };
 
     foreach my $id ( sort keys %{$Mentions} )
     {
