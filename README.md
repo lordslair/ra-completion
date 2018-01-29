@@ -23,7 +23,7 @@ They are located in /test/ folder.
 │   └── RAB
 │       ├── SQLite.pm                 |  RAB::SQLite     to interact with SQL3 DB
 │       ├── Twitter.pm                |  RAB::Twitter    to check mentions, and reply
-│       └── Untappd.pm                |  RAB::RAAPI      to fetch data from RA.org API
+│       └── RAAPI.pm                  |  RAB::RAAPI      to fetch data from RA.org API
 ├── test                              |  Bunch of test scripts
 ├── tmp                               |  Contains GameIcons
 ├── twitter-config.yaml               |  Twitter credentials
