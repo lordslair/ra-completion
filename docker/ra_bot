@@ -26,6 +26,10 @@ my $logging       = 1;                                     # 1= logging is on
 my $pidFilePath   = "/var/run/";                           # PID file path
 my $pidFile       = $pidFilePath . $daemonName . ".pid";
 
+# Funny stuff
+my $EMOJIko = "\e[31m".':o('."\e[0m";
+my $EMOJIok = "\e[32m".':o)'."\e[0m";
+
 # daemonize
 chdir '/';
 umask 0;
@@ -47,7 +51,7 @@ until ($dieNow) {
     sleep($sleepMainLoop);
 
     $loop++;
-    logEntry(":o) Entering loop $loop");
+    logEntry("$EMOJIok Entering loop $loop");
 
     my @twitter_users = RAB::SQLite::GetTwitterUsers;
 
@@ -58,7 +62,7 @@ until ($dieNow) {
     } or do {
         my $error = $@ || 'Unknown failure';
         chomp ($error);
-        logEntry(":o( ERROR: $error");
+        logEntry("$EMOJIko ERROR: $error");
         next;
     };
 
