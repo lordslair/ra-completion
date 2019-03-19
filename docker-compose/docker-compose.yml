@@ -1,0 +1,21 @@
+version: '2'
+
+services:
+    perl:
+        container_name: ra-completion-perl
+        volumes:
+            - ra-completion-sqlite-db:/db
+            - ./perl:/code
+        networks:
+            - code-network
+        build:
+          context: .
+          dockerfile: Dockerfile-perl
+        image: lordslair/ra-completion-perl
+        entrypoint: /code/ra-completion
+networks:
+    code-network:
+        driver: bridge
+volumes:
+    ra-completion-sqlite-db:
+        external: true
