@@ -5,10 +5,10 @@ use Image::Magick;
 #
 # Variables initialization
 #
-my $basefolder    = '/home/ra_bot';
+my $basefolder    = '/sprites';
 my $tmpfolder     = $basefolder . '/tmp';
 my $finalfolder   = $basefolder . '/img';
-my $spritesfolder = $basefolder . '/lib/RAB/Sprites';
+my $spritesfolder = $basefolder . '/src';
 
 if ( ! -d "$tmpfolder"   ) { mkdir "$tmpfolder"   }
 if ( ! -d "$finalfolder" ) { mkdir "$finalfolder" }

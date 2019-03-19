@@ -5,7 +5,9 @@ services:
         container_name: ra-completion-perl
         volumes:
             - ra-completion-sqlite-db:/db
+            - ra-completion-sprites:/sprites
             - ./perl:/code
+            - ./src:/sprites/src
         networks:
             - code-network
         build:
@@ -18,4 +20,6 @@ networks:
         driver: bridge
 volumes:
     ra-completion-sqlite-db:
+        external: true
+    ra-completion-sprites:
         external: true
