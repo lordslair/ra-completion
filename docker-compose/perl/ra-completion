@@ -5,7 +5,7 @@ use warnings;
 use File::Pid;
 use JSON;
 
-use lib '/home/ra_bot/lib';
+use lib '/code/lib';
 use RAB::Sprites;
 use RAB::RAAPI;
 use RAB::Twitter;
@@ -16,8 +16,10 @@ binmode(STDOUT, ":utf8");
 #
 # Variables initialization
 #
-my $twitterfile   = '/home/ra_bot/twitter-config.yaml';
-my $rafile        = '/home/ra_bot/ra-config.yaml';
+my $basedir       = '/code';
+my $twitterfile   = $basedir . '/twitter-config.yaml';
+my $rafile        = $basedir . '/ra-config.yaml';
+my $spritesdir    = '/sprites';
 
 my $daemonName    = "ra_bot";
 my $dieNow        = 0;                                     # used for "infinte loop" construct - allows daemon mode to gracefully exit
@@ -240,8 +242,8 @@ until ($dieNow) {
                        $kudos .= $kudos_end;
                     my $tweet = RAB::Twitter::FormatTweet($kudos);
 
-                    RAB::Twitter::SendTweetMedia($tweet,"/home/ra_bot/img/$user_tw/$GameID.png") or die "Failed to SendTweetMedia $!";
-                    logEntry( "[\@$user_tw:$user_ra]     /home/ra_bot/img/$user_tw/$GameID.png");
+                    RAB::Twitter::SendTweetMedia($tweet,"$spritesdir/img/$user_tw/$GameID.png") or die "Failed to SendTweetMedia $!";
+                    logEntry( "[\@$user_tw:$user_ra]     $spritesdir/img/$user_tw/$GameID.png");
                 }
             }
         }
@@ -261,7 +263,7 @@ sub logEntry {
 
 # catch signals and end the program if one is caught.
 sub signalHandler {
-    open DATA, "/home/ra_bot/test/getTwitterRateLimit.pl |" or die "Couldn't execute program: $!";
+    open DATA, "$basedir/test/getTwitterRateLimit.pl |" or die "Couldn't execute program: $!";
         while ( defined( my $line = <DATA> )  )
         {
             chomp($line);
