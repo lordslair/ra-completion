@@ -3,7 +3,7 @@ package RAB::SQLite;
 use DBI;
 
 my $dbh = DBI->connect(
-    "dbi:SQLite:dbname=/home/ra_bot/ra_completion.db",
+    "dbi:SQLite:dbname=/db/ra_completion.db",
     "",
     "",
     { RaiseError => 1 },
