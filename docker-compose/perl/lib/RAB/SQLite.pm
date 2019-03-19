@@ -2,8 +2,11 @@ package RAB::SQLite;
 
 use DBI;
 
+my $basedir = '/db';
+my $db      = 'ra-completion.db';
+
 my $dbh = DBI->connect(
-    "dbi:SQLite:dbname=/db/ra_completion.db",
+    "dbi:SQLite:dbname=$basedir/$db",
     "",
     "",
     { RaiseError => 1 },

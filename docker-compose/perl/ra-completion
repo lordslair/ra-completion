@@ -16,6 +16,7 @@ binmode(STDOUT, ":utf8");
 #
 # Variables initialization
 #
+
 my $basedir       = '/code';
 my $twitterfile   = $basedir . '/twitter-config.yaml';
 my $rafile        = $basedir . '/ra-config.yaml';
@@ -46,6 +47,9 @@ my $pidfile = File::Pid->new( { file => $pidFile, } );
 
 logEntry("=====");
 logEntry("Starting daemon");
+
+logEntry("exec: initDB");
+`perl $basedir/data/initDB.pl`;
 
 my $loop;
 # "infinite" loop where some useful process happens

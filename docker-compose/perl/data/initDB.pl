@@ -4,10 +4,14 @@ use warnings;
 
 use DBI;
 
-if ( ! -f "/home/ra_bot/ra_completion.db" )
+my $basedir = '/db';
+my $db      = 'ra-completion.db';
+
+if ( ! -f "$basedir/$db" || -z "$basedir/$db" )
 {
+    print STDERR "$basedir/$db\n";
     my $dbh = DBI->connect(
-        "dbi:SQLite:dbname=/home/ra_bot/ra_completion.db",
+        "dbi:SQLite:dbname=$basedir/$db",
         "",
         "",
         { RaiseError => 1 },
@@ -17,5 +21,5 @@ if ( ! -f "/home/ra_bot/ra_completion.db" )
 }
 else
 {
-    print "DB already exists, doin' nothin'\n";
+    print STDERR "DB already exists, doin' nothin'\n";
 }
