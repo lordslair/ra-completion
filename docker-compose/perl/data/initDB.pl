@@ -6,17 +6,11 @@ use DBI;
 
 my $basedir = '/db';
 my $db      = 'ra-completion.db';
+my $dsn     = "DBI:SQLite:dbname=$basedir/$db";
 
 if ( ! -f "$basedir/$db" || -z "$basedir/$db" )
 {
-    print STDERR "$basedir/$db\n";
-    my $dbh = DBI->connect(
-        "dbi:SQLite:dbname=$basedir/$db",
-        "",
-        "",
-        { RaiseError => 1 },
-    ) or die $DBI::errstr;
-
+    my $dbh = DBI->connect($dsn, '', '', { RaiseError => 1 }) or die $DBI::errstr;
     $dbh->do("CREATE TABLE Users(Id INT PRIMARY KEY, user_twitter TEXT, user_ra TEXT, ack TEXT, help TEXT, done_normal TEXT, done_hardcore TEXT)")
 }
 else
