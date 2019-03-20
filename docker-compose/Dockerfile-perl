@@ -9,6 +9,7 @@ RUN apk update \
     && cpanm --no-wget YAML::Tiny \
                        File::Pid \
                        Net::Twitter::Lite \
+                       Net::OAuth \
     && cpanm --no-wget Image::Magick --force \
     && cp /usr/share/zoneinfo/Europe/Paris /etc/localtime \
     && apk del .build-deps \
