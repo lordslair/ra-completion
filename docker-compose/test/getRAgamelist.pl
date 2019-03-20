@@ -4,10 +4,10 @@ use warnings;
 
 use JSON;
 
-use lib '/home/ra_bot/lib';
+use lib '/code/lib';
 use RAB::RAAPI;
 
-my $rafile  = '/home/ra_bot/ra-config.yaml';
+my $rafile  = '/code/ra-config.yaml';
 my $user_ra = $ARGV[0];
 
 my $recent_gamelist = RAB::RAAPI::GetUserRecentlyPlayedGames($rafile,$user_ra);

@@ -4,7 +4,7 @@ use DBI;
 use strict;
 
 my $driver   = "SQLite";
-my $database = "/home/ra_bot/ra_completion.db";
+my $database = "/db/ra-completion.db";
 my $dsn      = "DBI:$driver:dbname=$database";
 my $userid   = "";
 my $password = "";
