@@ -80,7 +80,7 @@ until ($dieNow) {
         }
         else
         {
-            if ( $Mentions->{$id}{'text'} =~ m/!(\w*)/ )
+            if ( $Mentions->{$id}{'text'} =~ m/REGISTER !(\w*)/ )
             {
                 my $username = $1;
                 my $user_tw  =  RAB::Twitter::SenderName($Mentions->{$id}{'sender_id'}) or die "Failed to SenderName $!";
