@@ -7,8 +7,7 @@ apk update \
     && apk add --no-cache --virtual .build-deps \
                                     curl make perl-dev libc-dev gcc bash tzdata \
     && curl -L https://cpanmin.us | perl - App::cpanminus --no-wget \
-    && cpanm --no-wget YAML::Tiny \
-                       File::Pid \
+    && cpanm --no-wget File::Pid \
                        Net::Twitter::Lite \
                        Net::OAuth \
     && cpanm --no-wget Image::Magick --force \

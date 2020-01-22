@@ -17,8 +17,7 @@ I added multiples test scripts as I was coding this to help me, and test almost 
 They are located in /test/ folder.
 
 ```
-├── Dockerfile-perl                   |  To build the docker container
-├── docker-compose.yml                |  To start the freshly built container
+.
 ├── perl                              |
 │   ├── data                          |
 │   │   └── initDB.pl                 |  DB creation if needed
@@ -27,8 +26,6 @@ They are located in /test/ folder.
 │   │       ├── SQLite.pm             |  RAB::SQLite     to interact with SQL3 DB
 │   │       ├── Twitter.pm            |  RAB::Twitter    to check mentions, and reply
 │   │       └── RAAPI.pm              |  RAB::RAAPI      to fetch data from RA.org API
-│   ├── twitter-config.yaml           |  Twitter credentials
-│   ├── ra-config.yaml                |  RA.org  credentials
 │   └── ra_completion                 |  Main script, the Docker endpoint who does all the work
 ├── src                               |  
 │   └── *.png                         |  Contains generated PNG sent to Twitter
@@ -45,7 +42,6 @@ I used mainy :
 * [Image::Magick][CPANIM] - PNG creation from layers
 * [DBI] - With SQLite driver for the DB
 * [JSON] - Make the output from RA.org usable in the script
-* [YAML::Tiny] - THE easy way to deal with YAML files
 * [docker/docker-ce][docker] to make it easy to maintain
 * [Alpine][alpine] - probably the best/lighter base container to work with
 * [Daemon exemple script][daemon] - gobland-it Perl daemon is based on this (Kudos)
