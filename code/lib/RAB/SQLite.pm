@@ -5,6 +5,7 @@ use DBI;
 my $driver   = 'SQLite';
 my $basedir  = '/code/db';
 my $db       = 'ra-completion.db';
+my $dsn      = "DBI:$driver:dbname=$basedir/$db";
 
 my $dbh = DBI->connect($dsn, '', '', { RaiseError => 1 })
    or die $DBI::errstr;
