@@ -2,15 +2,12 @@ package RAB::SQLite;
 
 use DBI;
 
-my $basedir = '/db';
-my $db      = 'ra-completion.db';
+my $driver   = 'SQLite';
+my $basedir  = '/code/db';
+my $db       = 'ra-completion.db';
 
-my $dbh = DBI->connect(
-    "dbi:SQLite:dbname=$basedir/$db",
-    "",
-    "",
-    { RaiseError => 1 },
-) or die $DBI::errstr;
+my $dbh = DBI->connect($dsn, '', '', { RaiseError => 1 })
+   or die $DBI::errstr;
 
 sub GetTwitterUsers
 {

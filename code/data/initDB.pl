@@ -4,9 +4,10 @@ use warnings;
 
 use DBI;
 
-my $basedir = '/db';
-my $db      = 'ra-completion.db';
-my $dsn     = "DBI:SQLite:dbname=$basedir/$db";
+my $driver   = 'SQLite';
+my $basedir  = '/code/db';
+my $db       = 'ra-completion.db';
+my $dsn      = "DBI:$driver:dbname=$basedir/$db";
 
 if ( ! -f "$basedir/$db" || -z "$basedir/$db" )
 {

@@ -3,9 +3,10 @@
 use DBI;
 use strict;
 
-my $driver   = "SQLite";
-my $database = "/db/ra-completion.db";
-my $dsn      = "DBI:$driver:dbname=$database";
+my $driver   = 'SQLite';
+my $basedir  = '/code/db';
+my $db       = 'ra-completion.db';
+my $dsn      = "DBI:$driver:dbname=$basedir/$db";
 my $userid   = "";
 my $password = "";
 
