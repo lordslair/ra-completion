@@ -17,18 +17,23 @@ I added multiples test scripts as I was coding this to help me, and test almost 
 They are located in /test/ folder.
 
 ```
-├── Dockerfile                        |  To build the docker container
-├── img                               |  Contains generated PNG sent to Twitter
-├── lib
-│   └── RAB
-│       ├── SQLite.pm                 |  RAB::SQLite     to interact with SQL3 DB
-│       ├── Twitter.pm                |  RAB::Twitter    to check mentions, and reply
-│       └── RAAPI.pm                  |  RAB::RAAPI      to fetch data from RA.org API
-├── test                              |  Bunch of test scripts
-├── tmp                               |  Contains GameIcons
-├── twitter-config.yaml               |  Twitter credentials
-├── ra-config.yaml                    |  RA.org  credentials
-└── ra_bot                            |  Main script, the Docker endpoint who does all the work
+├── Dockerfile-perl                   |  To build the docker container
+├── docker-compose.yml                |  To start the freshly built container
+├── perl                              |
+│   ├── data                          |
+│   │   └── initDB.pl                 |  DB creation if needed
+│   ├── lib                           |
+│   │   └── RAB                       |
+│   │       ├── SQLite.pm             |  RAB::SQLite     to interact with SQL3 DB
+│   │       ├── Twitter.pm            |  RAB::Twitter    to check mentions, and reply
+│   │       └── RAAPI.pm              |  RAB::RAAPI      to fetch data from RA.org API
+│   ├── twitter-config.yaml           |  Twitter credentials
+│   ├── ra-config.yaml                |  RA.org  credentials
+│   └── ra_completion                 |  Main script, the Docker endpoint who does all the work
+├── src                               |  
+│   └── *.png                         |  Contains generated PNG sent to Twitter
+└── test                              |  
+   └── *.pl                           |  Bunch of test scripts
 ```
 
 ### Tech
@@ -41,6 +46,9 @@ I used mainy :
 * [DBI] - With SQLite driver for the DB
 * [JSON] - Make the output from RA.org usable in the script
 * [YAML::Tiny] - THE easy way to deal with YAML files
+* [docker/docker-ce][docker] to make it easy to maintain
+* [Alpine][alpine] - probably the best/lighter base container to work with
+* [Daemon exemple script][daemon] - gobland-it Perl daemon is based on this (Kudos)
 
 And of course GitHub to store all these shenanigans. 
 
@@ -110,14 +118,12 @@ And here is the result when sent to Twitter.
  - ~~logs accessible from outside the container (docker logs stuff)~~
  - /data accessible from outside the container (docker volume stuff)
 
-### Useful stuff
-   
-   * [Daemon exemple script][daemon]
-   
 ---
    [CPANTwitt]: <http://search.cpan.org/~mmims/Net-Twitter-Lite-0.12008/lib/Net/Twitter/Lite/WithAPIv1_1.pod>
    [CPANIM]: <http://search.cpan.org/~jcristy/PerlMagick-6.89-1/Magick.pm>
    [daemon]: <http://www.andrewault.net/2010/05/27/creating-a-perl-daemon-in-ubuntu/>
+   [docker]: <https://github.com/docker/docker-ce>
+   [alpine]: <https://github.com/alpinelinux>
 
    [119-Normal]: <https://raw.githubusercontent.com/lordslair/ra_bot/master/Screenshot-119-Normal.png>
    [6494-Hardcore]: <https://raw.githubusercontent.com/lordslair/ra_bot/master/Screenshot-6494-Hardcore.png>
