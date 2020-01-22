@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: ra-completion-sqlite-db
+  name: ra-completion-code-perl
 spec:
   storageClassName: cinder-classic
   accessModes:

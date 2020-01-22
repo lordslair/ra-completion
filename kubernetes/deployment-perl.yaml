@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ra-completion-perl
+  name: ra-completion
   labels:
     app: perl
 spec:
@@ -16,15 +16,44 @@ spec:
       labels:
         app: perl
     spec:
+      initContainers:
+      - name: ra-completion-perl-init
+        image: busybox
+        volumeMounts:
+        - name: code
+          mountPath: /code
+        command: ["/bin/sh"]
+        args: [
+         "-c",
+         "(
+              wget   https://github.com/lordslair/ra_bot/archive/master.zip -O /tmp/ra_bot.zip &&
+              unzip  /tmp/ra_bot.zip -d /tmp/ &&
+              cp -a  /tmp/ra_bot-master/code/* /code/ &&
+              rm -rf /tmp/ra_bot-master /tmp/ra_bot.zip
+          ) || echo 1"
+        ]
       containers:
-      - name: ra-completion-perl
+      - name: ra-completion
         image: alpine
         command: ["/code/entrypoint.sh"]
+        env:
+        - name: RAUSER
+          value: <RetroAchievement.org userneme>
+        - name: RAKEY
+          value: <RetroAchievement.org apikey>
+        - name: TWITTCK
+          value: <Twitter consumer_key>
+        - name: TWITTST
+          value: <Twitter consumer_secret>
+        - name: TWITTAT
+          value: <Twitter access_token>
+        - name: TWITTTS
+          value: <Twitter access_token_secret>
         volumeMounts:
-        - mountPath: /db
-          name: sqlite-db
+        - mountPath: /code
+          name: code
       restartPolicy: Always
       volumes:
-      - name: sqlite-db
+      - name: code
         persistentVolumeClaim:
-          claimName: ra-completion-sqlite-db
+          claimName: ra-completion-code-perl
