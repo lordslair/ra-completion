@@ -5,7 +5,7 @@ use warnings;
 
 use DBI;
 
-use lib '/home/ra_bot/lib';
+use lib '/code/lib';
 use RAB::SQLite;
 
 my $user     = $ARGV[0];
