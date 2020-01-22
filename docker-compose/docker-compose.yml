@@ -6,9 +6,9 @@ services:
         volumes:
             - ra-completion-sqlite-db:/db
             - ra-completion-sprites:/sprites
-            - ./perl:/code
-            - ./test:/test
-            - ./src:/sprites/src
+            - ../code/perl:/code
+            - ../code/test:/test
+            - ../code/src:/sprites/src
         networks:
             - code-network
         build:
