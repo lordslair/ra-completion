@@ -5,7 +5,7 @@ use Image::Magick;
 #
 # Variables initialization
 #
-my $basefolder    = '/sprites';
+my $basefolder    = '/code/sprites';
 my $tmpfolder     = $basefolder . '/tmp';
 my $finalfolder   = $basefolder . '/img';
 my $spritesfolder = $basefolder . '/src';
