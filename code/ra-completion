@@ -17,10 +17,11 @@ binmode(STDOUT, ":utf8");
 # Variables initialization
 #
 
-my $basedir       = '/code';
-my $twitterfile   = $basedir . '/twitter-config.yaml';
-my $rafile        = $basedir . '/ra-config.yaml';
-my $spritesdir    = '/code/sprites';
+my $codedir       = '/code';
+my $twitterfile   = $codedir . '/twitter-config.yaml';
+my $rafile        = $codedir . '/ra-config.yaml';
+my $spritesdir    = $codedir . '/sprites';
+my $testdir       = $codedir . '/data/test';
 
 my $daemonName    = "ra_bot";
 my $dieNow        = 0;                                     # used for "infinte loop" construct - allows daemon mode to gracefully exit
@@ -49,7 +50,7 @@ logEntry("=====");
 logEntry("Starting daemon");
 
 logEntry("exec: initDB");
-`perl $basedir/data/initDB.pl`;
+`perl $codedir/data/initDB.pl`;
 
 my $loop;
 # "infinite" loop where some useful process happens
@@ -267,7 +268,7 @@ sub logEntry {
 
 # catch signals and end the program if one is caught.
 sub signalHandler {
-    open DATA, "$basedir/test/getTwitterRateLimit.pl |" or die "Couldn't execute program: $!";
+    open DATA, "$testdir/getTwitterRateLimit.pl |" or die "Couldn't execute program: $!";
         while ( defined( my $line = <DATA> )  )
         {
             chomp($line);

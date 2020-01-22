@@ -10,8 +10,8 @@ use YAML::Tiny;
 # Variables initialization
 #
 
-my $basedir       = '/code';
-my $twitterfile = $basedir . '/twitter-config.yaml';
+my $codedir       = '/code';
+my $twitterfile = $codedir . '/twitter-config.yaml';
 my $twittyaml = YAML::Tiny->read( $twitterfile );
 my $twitter = Net::Twitter::Lite::WithAPIv1_1->new(
     access_token_secret => $twittyaml->[0]{AccessTokenSecret},
