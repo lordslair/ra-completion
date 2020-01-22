@@ -144,4 +144,36 @@ sub SetGameAsDone
     }
 }
 
+sub SetGameAsUndone
+{
+    my $user = shift;
+    my $id   = shift;
+    my $mode = shift;
+
+    if ( $mode eq 'normal' or $mode eq 'hardcore' )
+    {
+        my $sth = $dbh->prepare( "SELECT done_$mode FROM Users WHERE user_twitter='$user';");
+           $sth->execute();
+        my $done  = $sth->fetchrow();
+           $sth->finish();
+
+        my @done_games = split /,/, $done;
+
+        if (my ($matched) = grep $_ eq $id, @done_games)
+        {
+            # Game $id is into @done_games
+            $done =~ s/,$id//;
+
+            $dbh->do("UPDATE Users SET done_$mode='$done' WHERE user_twitter='$user'");
+
+            return 'removed_from_db';
+        }
+        else
+        {
+            # Game $id is not into @done_games
+            return 'not_in_db';
+        }
+    }
+}
+
 1;
