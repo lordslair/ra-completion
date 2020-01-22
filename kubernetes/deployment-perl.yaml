@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ra-completion-perl
+  labels:
+    app: perl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: perl
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: perl
+    spec:
+      containers:
+      - name: ra-completion-perl
+        image: alpine
+        command: ["/code/entrypoint.sh"]
+        volumeMounts:
+        - mountPath: /db
+          name: sqlite-db
+      restartPolicy: Always
+      volumes:
+      - name: sqlite-db
+        persistentVolumeClaim:
+          claimName: ra-completion-sqlite-db
