@@ -7,10 +7,7 @@ use JSON;
 use lib '/code/lib';
 use RAB::RAAPI;
 
-my $rafile  = '/code/ra-config.yaml';
-my $user_ra = $ARGV[0];
-
-my $recent_gamelist = RAB::RAAPI::GetUserRecentlyPlayedGames($rafile,$user_ra);
+my $recent_gamelist = RAB::RAAPI::GetUserRecentlyPlayedGames($ARGV[0]);
 
 if ($recent_gamelist)
 {
@@ -25,7 +22,7 @@ if ($recent_gamelist)
         $X{$JSON->[$i]->{GameID}} = $i;
     }
 
-    my $Progress_ref = RAB::RAAPI::GetUserProgress($rafile,$user_ra,\@csv);
+    my $Progress_ref = RAB::RAAPI::GetUserProgress($ARGV[0],\@csv);
     my %Progress     = %{$Progress_ref};
 
     print "Game ID | SC Ach. | SC Score  | HC Ach. | HC Score \n";

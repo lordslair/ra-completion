@@ -18,8 +18,6 @@ binmode(STDOUT, ":utf8");
 #
 
 my $codedir       = '/code';
-my $twitterfile   = $codedir . '/twitter-config.yaml';
-my $rafile        = $codedir . '/ra-config.yaml';
 my $spritesdir    = $codedir . '/sprites';
 my $testdir       = $codedir . '/data/test';
 
@@ -104,7 +102,7 @@ until ($dieNow) {
                 if ( $ack ne 'yes' )
                 {   
                     my $user_ra = $username;
-                    my $return  = RAB::RAAPI::GetUserRankAndScore($rafile,$user_ra);
+                    my $return  = RAB::RAAPI::GetUserRankAndScore($user_ra);
 
                     if ($return)
                     {   
@@ -146,7 +144,7 @@ until ($dieNow) {
         my $user_tw = $USERS->{$user_id}{'user_twitter'};
         my $user_ra = $USERS->{$user_id}{'user_ra'};
 
-        my $return = RAB::RAAPI::GetUserRecentlyPlayedGames($rafile,$user_ra);
+        my $return = RAB::RAAPI::GetUserRecentlyPlayedGames($user_ra);
 
         if ($return)
         {
@@ -161,7 +159,7 @@ until ($dieNow) {
                 $X{$JSON->[$i]->{GameID}} = $i;
             }
 
-            my $retprogress = RAB::RAAPI::GetUserProgress($rafile,$user_ra,\@csv);
+            my $retprogress = RAB::RAAPI::GetUserProgress($user_ra,\@csv);
 
             foreach my $id ( keys %{$retprogress} )
             {
