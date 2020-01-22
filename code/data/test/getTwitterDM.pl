@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use lib '/home/ra_bot/lib';
+use lib '/code/lib';
 use RAB::Twitter;
 
 my $DM_ref = RAB::Twitter::Statuses;

@@ -1,24 +1,20 @@
 #!/usr/bin/perl
-
 use strict;
 use warnings;
 
 use Net::Twitter::Lite::WithAPIv1_1;
 
-use lib '/home/untappd-map/lib';
-use YAML::Tiny;
+use lib '/code/lib';
 
 #
 # Variables initialization
 #
 
-my $twitterfile = '/home/ra_bot/twitter-config.yaml';
-my $twittyaml = YAML::Tiny->read( $twitterfile );
 my $twitter = Net::Twitter::Lite::WithAPIv1_1->new(
-    access_token_secret => $twittyaml->[0]{AccessTokenSecret},
-    consumer_secret     => $twittyaml->[0]{ConsumerSecret},
-    access_token        => $twittyaml->[0]{AccessToken},
-    consumer_key        => $twittyaml->[0]{ConsumerKey},
+    access_token_secret => $ENV{'TWITTTS'},
+    consumer_secret     => $ENV{'TWITTST'},
+    access_token        => $ENV{'TWITTAT'},
+    consumer_key        => $ENV{'TWITTCK'},
     user_agent          => 'RA Completion Bot',
     ssl => 1,
 );
