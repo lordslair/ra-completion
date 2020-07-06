@@ -16,26 +16,18 @@ spec:
       labels:
         app: perl
     spec:
-      initContainers:
-      - name: ra-completion-perl-init
-        image: busybox
-        volumeMounts:
-        - name: code
-          mountPath: /code
+      restartPolicy: Always
+
+      containers:
+      - name: ra-completion
+        image: alpine
         command: ["/bin/sh"]
         args: [
          "-c",
          "(
-              wget   https://github.com/lordslair/ra_bot/archive/master.zip -O /tmp/ra_bot.zip &&
-              unzip  /tmp/ra_bot.zip -d /tmp/ &&
-              cp -a  /tmp/ra_bot-master/code/* /code/ &&
-              rm -rf /tmp/ra_bot-master /tmp/ra_bot.zip
+              wget -O - https://raw.githubusercontent.com/lordslair/ra_bot/master/code/entrypoint.sh | sh
           ) || echo 1"
         ]
-      containers:
-      - name: ra-completion
-        image: alpine
-        command: ["/code/entrypoint.sh"]
         env:
         - name: RAUSER
           value: <RetroAchievement.org userneme>
@@ -49,11 +41,3 @@ spec:
           value: <Twitter access_token>
         - name: TWITTTS
           value: <Twitter access_token_secret>
-        volumeMounts:
-        - mountPath: /code
-          name: code
-      restartPolicy: Always
-      volumes:
-      - name: code
-        persistentVolumeClaim:
-          claimName: ra-completion-code-perl
