@@ -17,4 +17,12 @@ apk update \
 
 echo "`date +"%F %X"` Build done ..."
 
+echo "`date +"%F %X"` Loading Perl scripts ..."
+mkdir /code && cd /code
+wget https://github.com/lordslair/ra_bot/archive/master.zip -O /tmp/ra_bot.zip &&
+unzip  /tmp/ra_bot.zip -d /tmp/ &&
+cp -a  /tmp/ra_bot-master/code/* /code/ &&
+rm -rf /tmp/ra_bot-master /tmp/ra_bot.zip
+echo "`date +"%F %X"` Loading done ..."
+
 exec /code/ra-completion
