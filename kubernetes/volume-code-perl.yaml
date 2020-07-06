@@ -3,7 +3,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: ra-completion-code-perl
 spec:
-  storageClassName: cinder-classic
+  storageClassName: csi-cinder-classic
   accessModes:
   - ReadWriteOnce
   resources:
