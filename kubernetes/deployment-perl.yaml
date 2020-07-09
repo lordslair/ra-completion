@@ -21,7 +21,7 @@ spec:
 
       containers:
       - name: ra-completion
-        image: alpine
+        image: alpine:3.12
         command: ["/bin/sh"]
         args: [
          "-c",
