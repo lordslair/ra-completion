@@ -19,10 +19,10 @@ echo "`date +"%F %X"` Build done ..."
 
 echo "`date +"%F %X"` Loading Perl scripts ..."
 mkdir  /code && cd /code &&
-wget   https://github.com/lordslair/ra_bot/archive/master.zip -O /tmp/ra_bot.zip &&
-unzip  /tmp/ra_bot.zip -d /tmp/ &&
-cp -a  /tmp/ra_bot-master/code/* /code/ &&
-rm -rf /tmp/ra_bot-master /tmp/ra_bot.zip &&
+wget   https://github.com/lordslair/ra-completion/archive/master.zip -O /tmp/ra-completion.zip &&
+unzip  /tmp/ra-completion.zip -d /tmp/ &&
+cp -a  /tmp/ra-completion-master/code/* /code/ &&
+rm -rf /tmp/ra-completion-master /tmp/ra-completion.zip &&
 mkdir  /code/db &&
 echo "`date +"%F %X"` Loading done ..."
 

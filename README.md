@@ -50,18 +50,18 @@ I used mainy :
 * [Alpine][alpine] - probably the best/lighter base container to work with
 * [Daemon exemple script][daemon] - gobland-it Perl daemon is based on this (Kudos)
 
-And of course GitHub to store all these shenanigans. 
+And of course GitHub to store all these shenanigans.
 
 ### Installation
 
 The core and its dependencies are meant to run in a Docker/k8s environment.  
 Could work without it, but more practical to maintain this way.  
-  
+
 Every part is kept in a different k8s file separately for more details.  
-  
+
 ```
-$ git clone https://github.com/lordslair/ra_bot
-$ cd ra_bot/kubernetes
+$ git clone https://github.com/lordslair/ra-completion
+$ cd ra-completion/kubernetes
 $ kubectl apply -f volume-code-perl.yaml
 $ kubectl apply -f deployment-perl.yaml
 ```
@@ -133,6 +133,6 @@ And here is the result when sent to Twitter.
    [docker]: <https://github.com/docker/docker-ce>
    [alpine]: <https://github.com/alpinelinux>
 
-   [119-Normal]: <https://raw.githubusercontent.com/lordslair/ra_bot/master/Screenshot-119-Normal.png>
-   [6494-Hardcore]: <https://raw.githubusercontent.com/lordslair/ra_bot/master/Screenshot-6494-Hardcore.png>
-   [330-Twitter]: <https://raw.githubusercontent.com/lordslair/ra_bot/master/Screenshot-330-Twitter.png>
+   [119-Normal]: <https://raw.githubusercontent.com/lordslair/ra-completion/master/Screenshot-119-Normal.png>
+   [6494-Hardcore]: <https://raw.githubusercontent.com/lordslair/ra-completion/master/Screenshot-6494-Hardcore.png>
+   [330-Twitter]: <https://raw.githubusercontent.com/lordslair/ra-completion/master/Screenshot-330-Twitter.png>

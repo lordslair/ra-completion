@@ -21,7 +21,7 @@ my $codedir       = '/code';
 my $spritesdir    = $codedir . '/sprites';
 my $testdir       = $codedir . '/data/test';
 
-my $daemonName    = "ra_bot";
+my $daemonName    = "ra-completion";
 my $dieNow        = 0;                                     # used for "infinte loop" construct - allows daemon mode to gracefully exit
 my $sleepMainLoop = 300;                                   # number of seconds to wait between "do something" execution after queue is clear
 my $logging       = 1;                                     # 1= logging is on
@@ -88,26 +88,26 @@ until ($dieNow) {
                 logEntry("[\@$user_tw] Got to reply" );
 
                 if (! grep( /^$user_tw$/, @twitter_users ))
-                {   
+                {
                     RAB::SQLite::CreateTwitterUser($Mentions->{$id}{'sender_id'},$user_tw,'');
                     logEntry("[\@$user_tw] Added in DB ($Mentions->{$id}{'sender_id'},$user_tw)");
                 }
                 else
-                {   
+                {
                     logEntry("[\@$user_tw] Already in DB ($Mentions->{$id}{'sender_id'},\@$user_tw)");
                 }
 
                 my $ack = RAB::SQLite::GetAck("$user_tw") or die "[\@$user_tw] Failed to GetAck $!";
 
                 if ( $ack ne 'yes' )
-                {   
+                {
                     my $user_ra = $username;
                     my $return  = RAB::RAAPI::GetUserRankAndScore($user_ra);
 
                     if ($return)
-                    {   
+                    {
                         if ( $return eq '{"Score":0,"Rank":"1"}' )
-                        {   
+                        {
                             logEntry("[\@$user_tw] '$user_ra' Not registered on RA, or shit happened");
 
                             if ( $ack eq 'fail' )
@@ -115,7 +115,7 @@ until ($dieNow) {
                                  logEntry("[\@$user_tw] Already sent fail registration DM. I did nothing.");
                             }
                             else
-                            {   
+                            {
                                 my $tweet = "I couldn't find your username '$user_ra' on RA.org. Check it out, and come back to me.";
 
                                 RAB::Twitter::SendTweet($id, $tweet);
