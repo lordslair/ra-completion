@@ -31,14 +31,32 @@ spec:
         ]
         env:
         - name: RAUSER
-          value: <RetroAchievement.org userneme>
+          valueFrom:
+            secretKeyRef:
+              name: ra-completion
+              key: RAUSER
         - name: RAKEY
-          value: <RetroAchievement.org apikey>
+          valueFrom:
+            secretKeyRef:
+              name: ra-completion
+              key: RAKEY
         - name: TWITTCK
-          value: <Twitter consumer_key>
+          valueFrom:
+            secretKeyRef:
+              name: ra-completion
+              key: TWITTCK
         - name: TWITTST
-          value: <Twitter consumer_secret>
+          valueFrom:
+            secretKeyRef:
+              name: ra-completion
+              key: TWITTST
         - name: TWITTAT
-          value: <Twitter access_token>
+          valueFrom:
+            secretKeyRef:
+              name: ra-completion
+              key: TWITTAT
         - name: TWITTTS
-          value: <Twitter access_token_secret>
+          valueFrom:
+            secretKeyRef:
+              name: ra-completion
+              key: TWITTTS
