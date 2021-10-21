@@ -3,7 +3,7 @@
 echo "`date +"%F %X"` Building Perl dependencies and system set-up ..."
 
 apk update \
-    && apk add --no-cache perl perl-libwww perl-dbi perl-dbd-sqlite perl-net-ssleay \
+    && apk add --no-cache perl perl-libwww perl-dbi perl-dbd-mysql perl-net-ssleay \
                           imagemagick6-dev \
     && apk add --no-cache --virtual .build-deps \
                                     curl make perl-dev libc-dev gcc bash tzdata \
@@ -24,7 +24,6 @@ wget   https://github.com/lordslair/ra-completion/archive/master.zip -O /tmp/ra-
 unzip  /tmp/ra-completion.zip -d /tmp/ &&
 cp -a  /tmp/ra-completion-master/code/* /code/ &&
 rm -rf /tmp/ra-completion-master /tmp/ra-completion.zip &&
-mkdir  /code/db &&
 echo "`date +"%F %X"` Loading done ..."
 
 exec /code/ra-completion
