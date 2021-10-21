@@ -1,14 +1,17 @@
-package RAB::SQLite;
+package RAB::SQL;
 
 use DBI;
 
-my $driver   = 'SQLite';
-my $basedir  = '/code/db';
-my $db       = 'ra-completion.db';
-my $dsn      = "DBI:$driver:dbname=$basedir/$db";
+my $driver     = 'mysql';
+my $SQL_DBNAME = $ENV{'SQL_DBNAME'};
+my $SQL_DBHOST = $ENV{'SQL_DBHOST'};
+my $SQL_DBUSER = $ENV{'SQL_DBUSER'};
+my $SQL_DBPASS = $ENV{'SQL_DBPASS'};
+my $SQL_DBPORT = $ENV{'SQL_DBPORT'};
+my $dsn        = "DBI:$driver:database=$SQL_DBNAME;host=$SQL_DBHOST;port=$SQL_DBPORT";
 
-my $dbh = DBI->connect($dsn, '', '', { RaiseError => 1 })
-   or die $DBI::errstr;
+my $dbh = DBI->connect($dsn, $SQL_DBUSER, $SQL_DBPASS, { RaiseError => 1 })
+  or die $DBI::errstr;
 
 sub GetTwitterUsers
 {
@@ -16,7 +19,7 @@ sub GetTwitterUsers
     $sth->execute();
     my @twitter_users;
     while (my $lastline = $sth->fetchrow_array)
-    {   
+    {
         push @twitter_users, $lastline;
     }
     $sth->finish();
@@ -25,7 +28,7 @@ sub GetTwitterUsers
 }
 
 sub CreateTwitterUser
-{   
+{
     my $id   = shift;
     my $user = shift;
     my $help = shift;
@@ -46,7 +49,7 @@ sub GetAck
 }
 
 sub SetAck
-{   
+{
     my $user = shift;
     my $ack  = shift;
     $dbh->do("UPDATE Users SET ack='$ack' WHERE user_twitter='$user'");

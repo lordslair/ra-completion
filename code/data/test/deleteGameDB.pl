@@ -5,7 +5,7 @@ use warnings;
 use DBI;
 
 use lib '/code/lib';
-use RAB::SQLite;
+use RAB::SQL;
 
 my $codedir       = '/code';
 my $testdir       = $codedir . '/data/test';
@@ -15,5 +15,5 @@ my $id       = $ARGV[1];
 my $mode     = $ARGV[2];
 
 system ("$testdir/getDatabase.pl");
-RAB::SQLite::SetGameAsUndone($user,$id,$mode);
+RAB::SQL::SetGameAsUndone($user,$id,$mode);
 system ("$testdir/getDatabase.pl");
