@@ -14,7 +14,7 @@ if ( ! -d "$tmpfolder"   ) { mkdir "$tmpfolder"   }
 if ( ! -d "$finalfolder" ) { mkdir "$finalfolder" }
 
 sub fetch
-{   
+{
     my $imageIcon   = shift;
        $imageIcon   =~ s/\/Images\///;
     my $image       = "$tmpfolder/$imageIcon";
@@ -116,7 +116,7 @@ sub create
 
         # Creation of % bar
         if ( $gamePercent > 0 )
-        {   
+        {
             my $pixels = sprintf("%.0f", 122/100 * $gamePercent);
             my $endpos = 122 - $pixels;
             my $end = Image::Magick->new;
@@ -128,7 +128,7 @@ sub create
             my $unit = Image::Magick->new;
             $unit->Read("$spritesfolder/bar-unit.png");
             while ( $pixels >= 0 )
-            {   
+            {
                 $big->Composite( image    => $unit,
                                  compose  => 'SrcAtop',
                                  geometry => "-$pixels+0" );
@@ -155,7 +155,7 @@ sub create
         $big->Composite( image => $scorebg, qw (compose SrcAtop geometry center));
 
         if ( $score =~ /^(\d)(\d)(\d)$/ )
-        {   
+        {
             my $nbr1 = Image::Magick->new;
             $nbr1->Read("$spritesfolder/digit-$1.png");
 
@@ -189,7 +189,7 @@ sub create
         }
 
         if ( $nbrachieve =~ /^(\d)(\d)(\d)$/ )
-        {   
+        {
             my $nbr1 = Image::Magick->new;
             $nbr1->Read("$spritesfolder/digit-$1.png");
 
@@ -204,7 +204,7 @@ sub create
             $big->Composite( image => $nbr3, qw (compose SrcAtop geometry +82-52));
         }
         if ( $nbrachieve =~ /^(\d)(\d)$/ )
-        {   
+        {
             my $nbr1 = Image::Magick->new;
             $nbr1->Read("$spritesfolder/digit-$1.png");
 
@@ -215,7 +215,7 @@ sub create
             $big->Composite( image => $nbr2, qw (compose SrcAtop geometry +82-52));
         }
         elsif ( $nbrachieve =~ /^(\d)$/ )
-        {   
+        {
             my $nbr1 = Image::Magick->new;
             $nbr1->Read("$spritesfolder/digit-$1.png");
 
