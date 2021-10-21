@@ -9,7 +9,7 @@ use lib '/code/lib';
 use RAB::Sprites;
 use RAB::RAAPI;
 use RAB::Twitter;
-use RAB::SQLite;
+use RAB::SQL;
 
 binmode(STDOUT, ":utf8");
 
@@ -58,7 +58,7 @@ until ($dieNow) {
     $loop++;
     logEntry("$EMOJIok Entering loop $loop");
 
-    my @twitter_users = RAB::SQLite::GetTwitterUsers;
+    my @twitter_users = RAB::SQL::GetTwitterUsers;
     my $Mentions;
 
     eval
@@ -89,7 +89,7 @@ until ($dieNow) {
 
                 if (! grep( /^$user_tw$/, @twitter_users ))
                 {
-                    RAB::SQLite::CreateTwitterUser($Mentions->{$id}{'sender_id'},$user_tw,'');
+                    RAB::SQL::CreateTwitterUser($Mentions->{$id}{'sender_id'},$user_tw,'');
                     logEntry("[\@$user_tw] Added in DB ($Mentions->{$id}{'sender_id'},$user_tw)");
                 }
                 else
@@ -97,7 +97,7 @@ until ($dieNow) {
                     logEntry("[\@$user_tw] Already in DB ($Mentions->{$id}{'sender_id'},\@$user_tw)");
                 }
 
-                my $ack = RAB::SQLite::GetAck("$user_tw") or die "[\@$user_tw] Failed to GetAck $!";
+                my $ack = RAB::SQL::GetAck("$user_tw") or die "[\@$user_tw] Failed to GetAck $!";
 
                 if ( $ack ne 'yes' )
                 {
@@ -119,7 +119,7 @@ until ($dieNow) {
                                 my $tweet = "I couldn't find your username '$user_ra' on RA.org. Check it out, and come back to me.";
 
                                 RAB::Twitter::SendTweet($id, $tweet);
-                                RAB::SQLite::SetAck($user_tw, 'fail');
+                                RAB::SQL::SetAck($user_tw, 'fail');
                             }
                         }
                         else
@@ -129,7 +129,7 @@ until ($dieNow) {
                             my $text         = "\@" . $user_tw . " Kudos. You're now associated with the RetroAchievement account : $user_ra";
 
                             RAB::Twitter::SendTweet($id, $text);
-                            RAB::SQLite::AddRAUser($user_tw,$user_ra);
+                            RAB::SQL::AddRAUser($user_tw,$user_ra);
                         }
                     }
                 }
@@ -137,7 +137,7 @@ until ($dieNow) {
         }
     }
 
-    my $USERS = RAB::SQLite::GetRegisteredUsers;
+    my $USERS = RAB::SQL::GetRegisteredUsers;
 
     foreach my $user_id ( keys %{$USERS} )
     {
@@ -183,7 +183,7 @@ until ($dieNow) {
                 {
                     if ( $NumAchievedHardcore == $NumPossibleAchievements )
                     {
-                        my $done = RAB::SQLite::SetGameAsDone($user_tw,$GameID,'hardcore');
+                        my $done = RAB::SQL::SetGameAsDone($user_tw,$GameID,'hardcore');
 
                         if ( $done eq 'already_in_db')
                         { #We don't do this one
@@ -207,7 +207,7 @@ until ($dieNow) {
                     {
                         if ( $NumAchieved == $NumPossibleAchievements )
                         {
-                            my $done = RAB::SQLite::SetGameAsDone($user_tw,$GameID,'normal');
+                            my $done = RAB::SQL::SetGameAsDone($user_tw,$GameID,'normal');
 
                             if ( $done eq 'already_in_db')
                             { #We don't do this one
