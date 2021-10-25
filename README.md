@@ -4,7 +4,7 @@ This project is mainly a PoC about using the Twitter API, ReroAchievement.org AP
 All of this inside a Docker container for portable purposes.  
 Powered up by Kubernetes.  
 
-Actually, as 2.0, it works this way, as soon as you send your RA username to the script via twitter :
+Actually, as 2.1, it works this way, as soon as you send your RA username to the script via twitter :
 
  - Fetch Scores, Games recently played, and Achievements RA.org
  - Sort the data and find if you completed a game (100% of achievements)
@@ -23,7 +23,7 @@ Actually, as 2.0, it works this way, as soon as you send your RA username to the
 │   │       └── *.pl                  |  Bunch of test scripts
 │   ├── lib                           |  
 │   │   └── RAB                       |  
-│   │       ├── SQLite.pm             |  RAB::SQLite     to interact with SQL3 DB
+│   │       ├── SQL.pm                |  RAB::SQL        to interact with MySQL DB
 │   │       ├── Twitter.pm            |  RAB::Twitter    to check mentions, and reply
 │   │       └── RAAPI.pm              |  RAB::RAAPI      to fetch data from RA.org API
 │   ├── ra-completion                 |  Main script, the Docker endpoint daemon who does all the work
@@ -33,8 +33,7 @@ Actually, as 2.0, it works this way, as soon as you send your RA username to the
 │       │   └── *.png                 |  Base PNG used to generate final images
 │       └── tmp                       |  Folder used for temporary transformation on sprites
 └── kubernetes                        |  
-    ├── deployment-*.yaml             |  Pods deployment files
-    └── volume-*.yaml                 |  Volumes deployment files
+    └── *.yaml                        |  Deployment files
 ```
 
 ### Tech
@@ -44,7 +43,7 @@ I used mainy :
 * Perl - as a lazy animal
 * [Net::Twitter::Lite::WithAPIv1_1;][CPANTwitt] - Easy Twitter API implementation
 * [Image::Magick][CPANIM] - PNG creation from layers
-* [DBI] - With SQLite driver for the DB
+* [DBI] - With SQL driver for the DB
 * [JSON] - Make the output from RA.org usable in the script
 * [docker/docker-ce][docker] to make it easy to maintain
 * [Alpine][alpine] - probably the best/lighter base container to work with
@@ -62,26 +61,17 @@ Every part is kept in a different k8s file separately for more details.
 ```
 $ git clone https://github.com/lordslair/ra-completion
 $ cd ra-completion/kubernetes
-$ kubectl apply -f volume-code-perl.yaml
-$ kubectl apply -f deployment-perl.yaml
+$ kubectl apply -f namespace.yaml
+$ kubectl apply -f secrets.yaml
+$ kubectl apply -f deployment.yaml
 ```
 
 This will create :  
-
-- The pod : ra-completion
 
 ```
 $ kubectl get pods
 NAME                                     READY   STATUS    RESTARTS   AGE
 ra-completion-867f8d5464-d8c8p           1/1     Running   0          142m
-```
-
-- The volume : code-perl
-
-```
-$ kubectl get pvc
-NAME                     STATUS   VOLUME                   CAPACITY   [...]
-ra-completion-code-perl  Bound    pvc-[...]-5e59fec92f65   1Gi        [...]
 ```
 
 ```
