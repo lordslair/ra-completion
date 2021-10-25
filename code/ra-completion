@@ -53,48 +53,66 @@ logEntry("exec: initDB");
 my $loop;
 # "infinite" loop where some useful process happens
 until ($dieNow) {
-    sleep($sleepMainLoop);
-
     $loop++;
     logEntry("$EMOJIok Entering loop $loop");
 
-    my @twitter_users = RAB::SQL::GetTwitterUsers;
-    my $Mentions;
-
+    my @twitter_users;
     eval
     {
-        $Mentions = RAB::Twitter::getMentions or die "Failed to getMentions $!";
-        1;
+        logEntry("[SYSTEM] RAB::SQL::GetTwitterUsers");
+        @twitter_users = RAB::SQL::GetTwitterUsers;
     } or do {
         my $error = $@ || 'Unknown failure';
         chomp ($error);
-        logEntry("$EMOJIko ERROR: $error");
+        logEntry("[SYSTEM] RAB::SQL::GetTwitterUsers FAIL: $error");
         next;
     };
 
-    foreach my $id ( sort keys %{$Mentions} )
+    eval
     {
-        if ( $Mentions->{$id}{'replied'} )
+        logEntry("[SYSTEM] RAB::Twitter::getMentions");
+        RAB::Twitter::getMentions;
+    } or do {
+        my $error = $@ || 'Unknown failure';
+        chomp ($error);
+        logEntry("[SYSTEM] RAB::Twitter::getMentions FAIL: $error");
+        next;
+    };
+
+    my %Mentions;
+    eval
+    {
+        logEntry("[SYSTEM] RAB::SQL::getMentions");
+        %Mentions = RAB::SQL::getMentions;
+    } or do {
+        my $error = $@ || 'Unknown failure';
+        chomp ($error);
+        logEntry("[SYSTEM] RAB::SQL::getMentions FAIL: $error");
+        last;
+    };
+
+    foreach my $id ( sort keys %Mentions )
+    {
+        if ( $Mentions{$id}{'replied'} )
         { #We don't do this one
         }
         else
         {
-            if ( $Mentions->{$id}{'text'} =~ m/REGISTER !(\w*)/ )
+            if ( $Mentions{$id}{'twitt_text'} =~ m/REGISTER !(\w*)/ )
             {
                 my $username = $1;
-                my $user_tw  =  RAB::Twitter::SenderName($Mentions->{$id}{'sender_id'}) or die "Failed to SenderName $!";
+                my $user_tw  =  RAB::Twitter::SenderName($Mentions{$id}{'sender_id'}) or die "Failed to SenderName $!";
 
-                logEntry("Got a not yet replied mention from \@$user_tw ($Mentions->{$id}{'text'})" );
                 logEntry("[\@$user_tw] Got to reply" );
 
                 if (! grep( /^$user_tw$/, @twitter_users ))
                 {
-                    RAB::SQL::CreateTwitterUser($Mentions->{$id}{'sender_id'},$user_tw,'');
-                    logEntry("[\@$user_tw] Added in DB ($Mentions->{$id}{'sender_id'},$user_tw)");
+                    RAB::SQL::CreateTwitterUser($Mentions{$id}{'sender_id'},$user_tw,'');
+                    logEntry("[\@$user_tw] Added in DB ($Mentions{$id}{'sender_id'},$user_tw)");
                 }
                 else
                 {
-                    logEntry("[\@$user_tw] Already in DB ($Mentions->{$id}{'sender_id'},\@$user_tw)");
+                    logEntry("[\@$user_tw] Already in DB ($Mentions{$id}{'sender_id'},\@$user_tw)");
                 }
 
                 my $ack = RAB::SQL::GetAck("$user_tw") or die "[\@$user_tw] Failed to GetAck $!";
@@ -138,14 +156,32 @@ until ($dieNow) {
         }
     }
 
-    my $USERS = RAB::SQL::GetRegisteredUsers;
+    my $USERS;
+    eval
+    {
+        $USERS = RAB::SQL::GetRegisteredUsers;
+        logEntry( "[SYSTEM] RAB::SQL::GetRegisteredUsers DONE");
+    } or do {
+        my $error = $@ || 'Unknown failure';
+        chomp ($error);
+        logEntry("[SYSTEM] RAB::SQL::GetRegisteredUsers FAIL: $error");
+    };
 
     foreach my $user_id ( keys %{$USERS} )
     {
         my $user_tw = $USERS->{$user_id}{'user_twitter'};
         my $user_ra = $USERS->{$user_id}{'user_ra'};
 
-        my $return = RAB::RAAPI::GetUserRecentlyPlayedGames($user_ra);
+        my $return;
+        eval
+        {
+            $return = RAB::RAAPI::GetUserRecentlyPlayedGames($user_ra);
+            logEntry( "[\@$user_tw:$user_ra] RAB::RAAPI::GetUserRecentlyPlayedGames($user_ra) DONE");
+        } or do {
+            my $error = $@ || 'Unknown failure';
+            chomp ($error);
+            logEntry("[\@$user_tw:$user_ra] RAB::RAAPI::GetUserRecentlyPlayedGames($user_ra) FAIL: $error");
+        };
 
         if ($return)
         {
@@ -160,7 +196,16 @@ until ($dieNow) {
                 $X{$JSON->[$i]->{GameID}} = $i;
             }
 
-            my $retprogress = RAB::RAAPI::GetUserProgress($user_ra,\@csv);
+            my $retprogress;
+            eval
+            {
+                $retprogress = RAB::RAAPI::GetUserProgress($user_ra,\@csv);
+                logEntry( "[\@$user_tw:$user_ra] RAB::RAAPI::GetUserProgress($user_ra,\@csv) DONE");
+            } or do {
+                my $error = $@ || 'Unknown failure';
+                chomp ($error);
+                logEntry("[\@$user_tw:$user_ra] RAB::RAAPI::GetUserProgress($user_ra,\@csv) FAIL: $error");
+            };
 
             foreach my $id ( keys %{$retprogress} )
             {
@@ -197,8 +242,6 @@ until ($dieNow) {
                             $goodtogo    = 'ok';
                             $score       = $ScoreAchievedHardcore;
                             $achieved    = $NumAchievedHardcore;
-
-                            logEntry( "[\@$user_tw:$user_ra]   Marked this game ($id:$GameTitle:$mode) as DONE in DB");
                         }
                     }
                 }
@@ -221,8 +264,6 @@ until ($dieNow) {
                                 $goodtogo    = 'ok';
                                 $score       = $ScoreAchieved;
                                 $achieved    = $NumAchieved;
-
-                                logEntry( "[\@$user_tw:$user_ra]   Marked this game ($id:$GameTitle:$mode) as DONE in DB");
                             }
                         }
                         else
@@ -239,19 +280,41 @@ until ($dieNow) {
                     RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon});
                     RAB::Sprites::create($user_tw, $GameID, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, $mode, $ScoreAchieved, $NumPossibleAchievements);
 
-                    logEntry( "[\@$user_tw:$user_ra]     Sending tweet about this");
                     my $kudos  = "\@$user_tw Kudos, ";
                        $kudos .= "with $achieved/$NumPossibleAchievements Achievements unlocked, ";
                        $kudos .= "you completed $GameTitle ($JSON->[$X{$id}]->{ConsoleName})[$GameID]";
                        $kudos .= $kudos_end;
                     my $tweet = RAB::Twitter::FormatTweet($kudos);
 
-                    RAB::Twitter::SendTweetMedia($tweet,"$spritesdir/img/$user_tw/$GameID.png") or die "Failed to SendTweetMedia $!";
-                    logEntry( "[\@$user_tw:$user_ra]     $spritesdir/img/$user_tw/$GameID.png");
+                    # We send the tweet about the game
+                    eval
+                    {
+                        RAB::Twitter::SendTweetMedia($tweet,"$spritesdir/img/$user_tw/$GameID.png");
+                        logEntry( "[\@$user_tw:$user_ra]     RAB::Twitter::SendTweetMedia(...) DONE");
+                    } or do {
+                        my $error = $@ || 'Unknown failure';
+                        chomp ($error);
+                        logEntry("[\@$user_tw:$user_ra]     RAB::Twitter::SendTweetMedia(...) FAIL: $error");
+                        # We next here to avoid marking a game in DB if tweet not sent
+                        next;
+                    };
+
+                    # We mark the game as DONE in DB
+                    eval
+                    {
+                        RAB::SQL::SetGameAsDone($user_tw,$GameID,$mode);
+                        logEntry( "[\@$user_tw:$user_ra]     RAB::SQL::SetGameAsDone($user_tw,$GameID,$mode) DONE");
+                    } or do {
+                        my $error = $@ || 'Unknown failure';
+                        chomp ($error);
+                        logEntry("[\@$user_tw:$user_ra]     RAB::SQL::SetGameAsDone($user_tw,$GameID,$mode) FAIL: $error");
+                    };
                 }
             }
         }
     }
+    # Loop is done, we sleep until next iteration
+    sleep($sleepMainLoop);
 }
 
 # add a line to the log file
@@ -267,14 +330,6 @@ sub logEntry {
 
 # catch signals and end the program if one is caught.
 sub signalHandler {
-    open DATA, "$testdir/getTwitterRateLimit.pl |" or die "Couldn't execute program: $!";
-        while ( defined( my $line = <DATA> )  )
-        {
-            chomp($line);
-            logEntry($line);
-        }
-    close DATA;
-    logEntry("Stop signal caught");
     $dieNow = 1;    # this will cause the "infinite loop" to exit
 }
 
