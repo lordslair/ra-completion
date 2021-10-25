@@ -8,6 +8,7 @@ Actually, as 2.1, it works this way, as soon as you send your RA username to the
 
  - Fetch Scores, Games recently played, and Achievements RA.org
  - Sort the data and find if you completed a game (100% of achievements)
+ - Store information in remote MySQL DB to limit Twitter/RA.org API calls
  - Fetch the Game Icon fom RA.org, and convert it in 64x64
  - Compose the final image by adding PNG layers
  - Reply to your tweet with the PNG as media
@@ -24,6 +25,7 @@ Actually, as 2.1, it works this way, as soon as you send your RA username to the
 │   ├── lib                           |  
 │   │   └── RAB                       |  
 │   │       ├── SQL.pm                |  RAB::SQL        to interact with MySQL DB
+│   │       ├── Sprites.pm            |  RAB::Sprites    to interact with Imagemagick
 │   │       ├── Twitter.pm            |  RAB::Twitter    to check mentions, and reply
 │   │       └── RAAPI.pm              |  RAB::RAAPI      to fetch data from RA.org API
 │   ├── ra-completion                 |  Main script, the Docker endpoint daemon who does all the work
@@ -76,25 +78,32 @@ ra-completion-867f8d5464-d8c8p           1/1     Running   0          142m
 
 ```
 $ kubectl logs -f ra-completion-55c96467bd-wrvkv
-2020-01-22 22:45:12 Building Perl dependencies and system set-up ...
+2021-10-25 17:40:00 Building Perl dependencies and system set-up ...
 [...]
-OK: 138 MiB in 92 packages
+OK: 157 MiB in 98 packages
 [...]
-2020-01-22 23:49:33 Build done ...
-2020-01-22 23:49:33 | =====
-2020-01-22 23:49:33 | Starting daemon
-2020-01-22 23:49:33 | exec: initDB
-2017-08-31 15:23:43 | :o) Entering loop 1
-2017-08-31 15:24:45 | Got a not yet replied mention from @Lordslair (@ra_completion !Lordslair)
-2017-08-31 15:24:45 | [@Lordslair] Got to reply
-2017-08-31 15:24:45 | [@Lordslair] Added in DB (440766852,Lordslair)
-2017-08-31 15:24:45 | [@Lordslair] Registered on RA (Lordslair), sending ACK Tweet
-2017-08-31 15:24:46 | [@Lordslair:Lordslair]   Marked this game (113:Hellfire:normal) as DONE in DB
-2017-08-31 15:24:46 | [@Lordslair:Lordslair]     Sending tweet about this
-2017-08-31 15:24:47 | [@Lordslair:Lordslair]     /code/sprites/img/Lordslair/113.png
-2017-08-31 15:24:47 | [@Lordslair:Lordslair]   Marked this game (330:Gynoug:normal) as DONE in DB
-2017-08-31 15:24:47 | [@Lordslair:Lordslair]     Sending tweet about this
-2017-08-31 15:24:48 | [@Lordslair:Lordslair]     /code/sprites/img/Lordslair/330.png
+2021-10-25 17:40:03 Loading done ...
+2021-10-25 17:40:03 | =====
+2021-10-25 17:40:03 | Starting daemon
+2021-10-25 17:40:03 | exec: initDB
+2021-10-25 17:40:03 | :o) Entering loop 1
+2021-10-25 17:40:03 | [SYSTEM] RAB::SQL::GetTwitterUsers
+2021-10-25 17:40:03 | [SYSTEM] RAB::Twitter::getMentions
+2021-10-25 17:40:04 | [SYSTEM] RAB::SQL::getMentions
+2021-10-25 17:40:04 | [@Lordslair] Got to reply
+2021-10-25 17:40:04 | [@Lordslair] Added in DB (867418136341090304,Lordslair)
+2021-10-25 17:40:04 | [@Lordslair] Registered on RA (Lordslair), sending ACK Tweet
+2021-10-25 17:40:04 | [SYSTEM] RAB::SQL::GetRegisteredUsers DONE
+2021-10-25 17:40:05 | [@Lordslair:Lordslair] RAB::RAAPI::GetUserRecentlyPlayedGames(Lordslair) DONE
+2021-10-25 17:40:05 | [@Lordslair:Lordslair] RAB::RAAPI::GetUserProgress(Lordslair,@csv) DONE
+2021-10-25 17:40:05 | [@Lordslair:Lordslair] RAB::Twitter::SendTweetMedia(...) DONE
+2021-10-25 17:45:03 | :o) Entering loop 2
+2021-10-25 17:45:03 | [SYSTEM] RAB::SQL::GetTwitterUsers
+2021-10-25 17:45:03 | [SYSTEM] RAB::Twitter::getMentions
+2021-10-25 17:45:04 | [SYSTEM] RAB::SQL::getMentions
+2021-10-25 17:45:04 | [SYSTEM] RAB::SQL::GetRegisteredUsers DONE
+2021-10-25 17:45:04 | [@Lordslair:Lordslair] RAB::RAAPI::GetUserRecentlyPlayedGames(Lordslair) DONE
+2021-10-25 17:45:04 | [@Lordslair:Lordslair] RAB::RAAPI::GetUserProgress(Lordslair,@csv) DONE
 ```
 
 #### Disclaimer/Reminder
