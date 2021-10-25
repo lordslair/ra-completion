@@ -21,7 +21,7 @@ spec:
 
       containers:
       - name: ra-completion
-        image: alpine:3.12
+        image: alpine:3.14
         command: ["/bin/sh"]
         args: [
          "-c",
@@ -60,3 +60,28 @@ spec:
             secretKeyRef:
               name: ra-completion
               key: TWITTTS
+        - name: SQL_DBNAME
+          valueFrom:
+            secretKeyRef:
+              name: ra-completion
+              key: sql-db
+        - name: SQL_DBHOST
+          valueFrom:
+            secretKeyRef:
+              name: ra-completion
+              key: sql-host
+        - name: SQL_DBPORT
+          valueFrom:
+            secretKeyRef:
+              name: ra-completion
+              key: sql-port
+        - name: SQL_DBPASS
+          valueFrom:
+            secretKeyRef:
+              name: ra-completion
+              key: sql-pass
+        - name: SQL_DBUSER
+          valueFrom:
+            secretKeyRef:
+              name: ra-completion
+              key: sql-user
