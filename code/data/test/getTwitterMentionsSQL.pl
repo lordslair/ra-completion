@@ -13,7 +13,6 @@ binmode(STDOUT, ":utf8");
 # Variables initialization
 #
 
-RAB::Twitter::getMentions;
 my %Mentions = RAB::SQL::getMentions();
 
 foreach my $id ( sort keys %Mentions )
