@@ -4,6 +4,8 @@ use warnings;
 
 use Net::Twitter::Lite::WithAPIv1_1;
 
+use RAB::SQL;
+
 #
 # Variables initialization
 #
@@ -19,21 +21,50 @@ my $twitter = Net::Twitter::Lite::WithAPIv1_1->new(
 
 sub getMentions
 {
-    my %Mentions;
-    my $lastmsg_id  = $twitter->mentions({ count => 1 });
+    my $lastmsg_id;
+    my $lastmsg_id_sql = RAB::SQL::GetLastTweetId();
+    if ($lastmsg_id_sql)
+    {
+      $lastmsg_id = $lastmsg_id_sql;
+    }
+    else
+    {
+      $lastmsg_id = 1;
+    }
+    my $latestmsg_id   = 1;
+
     while ( )
     {
-        my $mentions    = $twitter->mentions({ max_id => $lastmsg_id, count => 20 });
-        for my $mention ( @$mentions )
+        my $mentions;
+        eval
         {
-            $Mentions{$mention->{id}}{'sender_id'}  = $mention->{user}{id};
-            $Mentions{$mention->{id}}{'created_at'} = $mention->{created_at};
-            $Mentions{$mention->{id}}{'text'}       = $mention->{text};
-            $Mentions{$mention->{id}}{'sender'}     = $mention->{user}{name};
+            $mentions    = $twitter->mentions({ since_id => $lastmsg_id, count => 20 });
+        } or do {
+            my $error = $@ || 'Unknown failure';
+            chomp ($error);
+            print "[SYSTEM]   $error\n";
+            last;
+        };
 
-            $lastmsg_id = $mention->{id} - 1;
+        for my $mention ( reverse @$mentions )
+        {
+            $latestmsg_id = $mention->{id};
+            RAB::SQL::StoreTwitt($mention->{id},
+                                 $mention->{user}{id},
+                                 $mention->{user}{name},
+                                 $mention->{user}{screen_name},
+                                 $mention->{text},
+                                 $mention->{created_at});
         }
-        if ( scalar(@$mentions) != 20 ) { last }
+
+        if ( scalar(@$mentions) != 20 )
+        {
+          last;
+        }
+        else
+        {
+          $lastmsg_id = $latestmsg_id;
+        }
     }
 
     $lastmsg_id  = $twitter->user_timeline({ count => 1 });
@@ -45,15 +76,15 @@ sub getMentions
             my $id = $reply->{in_reply_to_status_id};
             if ( $id )
             {
-            # This tweet is already a response to someone's mention
-                $Mentions{$id}{'replied'} = 'yes';
+                # This tweet is already a response to someone's mention
+                RAB::SQL::StoreTwittReplied($id);
             }
             else { }
             $lastmsg_id = $reply->{id} - 1;
         }
         if ( scalar(@$replies) != 20 ) { last }
     }
-    return \%Mentions;
+    return $lastmsg_id;
 }
 
 sub SenderName
@@ -71,10 +102,10 @@ sub Statuses
     my $lastmsg_id  = $twitter->direct_messages({ count => 1 });
     my %DM;
     while ( )
-    {   
+    {
         my $statuses    = $twitter->direct_messages({ max_id => $lastmsg_id, count => 20 });
         for my $status ( @$statuses )
-        {   
+        {
             $DM{$status->{sender}{screen_name}}{'id'}                              = $status->{sender_id};
             $DM{$status->{sender}{screen_name}}{'dm'}{$status->{id}}{'created_at'} = $status->{created_at};
             $DM{$status->{sender}{screen_name}}{'dm'}{$status->{id}}{'text'}       = $status->{text};
@@ -93,11 +124,11 @@ sub FormatTweet
     my $length = 140 - $tco;
 
     if ( @{[$text =~ /./sg]} < $length )
-    {   
+    {
         # We're good with text length
     }
     else
-    {   
+    {
         $text  = substr( $text, 0, $length - 3 );
         $text .= '...';
     }
@@ -105,11 +136,11 @@ sub FormatTweet
 }
 
 sub SendDM
-{   
+{
     my $user  = shift;
     my $text  = shift;
 
-    my $dm    = $twitter->new_direct_message({ user => $user, text => $text }); 
+    my $dm    = $twitter->new_direct_message({ user => $user, text => $text });
 }
 
 

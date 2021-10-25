@@ -32,9 +32,72 @@ sub CreateTwitterUser
     my $id   = shift;
     my $user = shift;
     my $help = shift;
-    my $sth  = $dbh->prepare( "INSERT INTO Users VALUES('$id','$user','','no','$help','','');");
+    my $sth  = $dbh->prepare( "INSERT INTO Users  (sender_id,user_twitter,ack,help)
+                                           VALUES (?,?,?,?);");
+    $sth->execute($id,$user,'no',$help);
+    $sth->finish();
+}
+
+sub StoreTwitt
+{
+    my $twitt_id           = shift;
+    my $sender_id          = shift;
+    my $sender_name        = shift;
+    my $sender_screen_name = shift;
+    my $twitt_text         = shift;
+    my $created_at         = shift;
+
+    if (! GetTwittFromId($twitt_id))
+    {
+        my $sth  = $dbh->prepare( "INSERT INTO Twitts (twitt_id,sender_id,sender_name,sender_screen_name,twitt_text,created_at)
+                                               VALUES (?,?,?,?,?,?);");
+        $sth->execute($twitt_id,$sender_id,$sender_name,$sender_screen_name,$twitt_text,$created_at);
+        $sth->finish();
+    }
+}
+
+sub getMentions
+{
+  my $hash;
+  eval
+  {
+      $hash = $dbh->selectall_hashref("SELECT * FROM Twitts;", 'Id' );
+  } or do {
+      my $error = $@ || 'Unknown failure';
+      chomp ($error);
+      print "[SYSTEM] SQL QUERY FAIL: $error";
+      next;
+  };
+  return %$hash;
+}
+
+sub GetTwittFromId
+{
+    my $twitt_id = shift;
+    my $sth = $dbh->prepare( "SELECT * FROM Twitts WHERE twitt_id='$twitt_id';");
+       $sth->execute();
+    my $twitt = $sth->fetchrow();
+       $sth->finish();
+
+    return $twitt;
+}
+
+sub StoreTwittReplied
+{
+    my $twitt_id           = shift;
+    my $sth  = $dbh->prepare( "UPDATE Twitts SET replied=True WHERE twitt_id='$twitt_id';");
     $sth->execute();
     $sth->finish();
+}
+
+sub GetLastTweetId
+{
+    my $sth = $dbh->prepare( "SELECT twitt_id FROM Twitts ORDER BY Id DESC LIMIT 1" );
+    $sth->execute();
+    my $last_tweet_id = $sth->fetchrow();
+    $sth->finish();
+
+    return $last_tweet_id;
 }
 
 sub GetAck
@@ -143,6 +206,29 @@ sub SetGameAsDone
                 $dbh->do("UPDATE Users SET done_$mode='$done' WHERE user_twitter='$user'");
             }
             return 'added_in_db';
+        }
+    }
+}
+
+sub CheckGameIsDone
+{
+    my $user = shift;
+    my $id   = shift;
+    my $mode = shift;
+
+    if ( $mode eq 'normal' or $mode eq 'hardcore' )
+    {
+        my $sth = $dbh->prepare( "SELECT done_$mode FROM Users WHERE user_twitter='$user';");
+           $sth->execute();
+        my $done  = $sth->fetchrow();
+           $sth->finish();
+
+        my @done_games = split /,/, $done;
+
+        if (my ($matched) = grep $_ eq $id, @done_games)
+        {
+            # No action if game is already into done games
+            return 'already_in_db';
         }
     }
 }

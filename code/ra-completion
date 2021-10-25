@@ -129,6 +129,7 @@ until ($dieNow) {
                             my $text         = "\@" . $user_tw . " Kudos. You're now associated with the RetroAchievement account : $user_ra";
 
                             RAB::Twitter::SendTweet($id, $text);
+                            RAB::SQL::StoreTwittReplied($Mentions{$id}{'twitt_id'});
                             RAB::SQL::AddRAUser($user_tw,$user_ra);
                         }
                     }
@@ -183,7 +184,7 @@ until ($dieNow) {
                 {
                     if ( $NumAchievedHardcore == $NumPossibleAchievements )
                     {
-                        my $done = RAB::SQL::SetGameAsDone($user_tw,$GameID,'hardcore');
+                        my $done = RAB::SQL::CheckGameIsDone($user_tw,$GameID,'hardcore');
 
                         if ( $done eq 'already_in_db')
                         { #We don't do this one
@@ -207,7 +208,7 @@ until ($dieNow) {
                     {
                         if ( $NumAchieved == $NumPossibleAchievements )
                         {
-                            my $done = RAB::SQL::SetGameAsDone($user_tw,$GameID,'normal');
+                            my $done = RAB::SQL::CheckGameIsDone($user_tw,$GameID,'normal');
 
                             if ( $done eq 'already_in_db')
                             { #We don't do this one
