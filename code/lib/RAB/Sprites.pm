@@ -1,6 +1,8 @@
 package RAB::Sprites;
 
 use Image::Magick;
+use LWP::Simple qw(getstore);
+use LWP::UserAgent;
 
 #
 # Variables initialization
@@ -21,9 +23,6 @@ sub fetch
 
     if ( ! -f "$image" )
     {
-        use LWP::Simple qw(getstore);
-        require LWP::UserAgent;
-
         my $url      = "http://www.retroachievements.org/Images/$imageIcon";
         my $save     = "$tmpfolder/$imageIcon";
 
