@@ -68,10 +68,6 @@ sub GetUserProgress
     {
         return decode_json($response->content);
     }
-    else
-    {
-        print STDERR Dumper $response;
-    }
 }
 
 1;
