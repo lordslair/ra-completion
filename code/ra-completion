@@ -207,109 +207,116 @@ until ($dieNow) {
                 logEntry("[\@$user_tw:$user_ra] RAB::RAAPI::GetUserProgress($user_ra,\@csv) FAIL: $error");
             };
 
-            foreach my $id ( keys %{$retprogress} )
+            if ($retprogress)
             {
-                my $kudos_end;
-                my $goodtogo;
-                my $achieved;
-                my $score;
-                my $mode;
-                my $gamePercent;
-
-                my $NumPossibleAchievements = $retprogress->{$id}->{NumPossibleAchievements};
-                my $ScoreAchievedHardcore   = $retprogress->{$id}->{ScoreAchievedHardcore};
-                my $NumAchievedHardcore     = $retprogress->{$id}->{NumAchievedHardcore};
-                my $ScoreAchieved           = $retprogress->{$id}->{ScoreAchieved};
-                my $NumAchieved             = $retprogress->{$id}->{NumAchieved};
-
-                my $GameTitle               = $JSON->[$X{$id}]->{Title};
-                my $GameID                  = $JSON->[$X{$id}]->{GameID};
-
-                if ( $ScoreAchievedHardcore > 0 )
+                foreach my $id ( keys %{$retprogress} )
                 {
-                    if ( $NumAchievedHardcore == $NumPossibleAchievements )
-                    {
-                        my $done = RAB::SQL::CheckGameIsDone($user_tw,$GameID,'hardcore');
+                    my $kudos_end;
+                    my $goodtogo;
+                    my $achieved;
+                    my $score;
+                    my $mode;
+                    my $gamePercent;
 
-                        if ( $done eq 'already_in_db')
-                        { #We don't do this one
-                        }
-                        else
-                        {
-                            $mode        = 'hardcore';
-                            $gamePercent = sprintf("%.0f", 100*$NumAchievedHardcore/$NumPossibleAchievements);
-                            $kudos_end   = ' in HARDCORE !';
-                            $goodtogo    = 'ok';
-                            $score       = $ScoreAchievedHardcore;
-                            $achieved    = $NumAchievedHardcore;
-                        }
-                    }
-                }
-                if ( $ScoreAchieved > 0 )
-                {
-                    if ( $NumAchievedHardcore < $NumPossibleAchievements )
+                    my $NumPossibleAchievements = $retprogress->{$id}->{NumPossibleAchievements};
+                    my $ScoreAchievedHardcore   = $retprogress->{$id}->{ScoreAchievedHardcore};
+                    my $NumAchievedHardcore     = $retprogress->{$id}->{NumAchievedHardcore};
+                    my $ScoreAchieved           = $retprogress->{$id}->{ScoreAchieved};
+                    my $NumAchieved             = $retprogress->{$id}->{NumAchieved};
+
+                    my $GameTitle               = $JSON->[$X{$id}]->{Title};
+                    my $GameID                  = $JSON->[$X{$id}]->{GameID};
+
+                    if ( $ScoreAchievedHardcore > 0 )
                     {
-                        if ( $NumAchieved == $NumPossibleAchievements )
+                        if ( $NumAchievedHardcore == $NumPossibleAchievements )
                         {
-                            my $done = RAB::SQL::CheckGameIsDone($user_tw,$GameID,'normal');
+                            my $done = RAB::SQL::CheckGameIsDone($user_tw,$GameID,'hardcore');
 
                             if ( $done eq 'already_in_db')
                             { #We don't do this one
                             }
                             else
                             {
-                                $mode        = 'normal';
-                                $gamePercent = sprintf("%.0f", 100*$NumAchieved/$NumPossibleAchievements);
-                                $kudos_end   = ' !';
+                                $mode        = 'hardcore';
+                                $gamePercent = sprintf("%.0f", 100*$NumAchievedHardcore/$NumPossibleAchievements);
+                                $kudos_end   = ' in HARDCORE !';
                                 $goodtogo    = 'ok';
-                                $score       = $ScoreAchieved;
-                                $achieved    = $NumAchieved;
+                                $score       = $ScoreAchievedHardcore;
+                                $achieved    = $NumAchievedHardcore;
+                            }
+                        }
+                    }
+                    if ( $ScoreAchieved > 0 )
+                    {
+                        if ( $NumAchievedHardcore < $NumPossibleAchievements )
+                        {
+                            if ( $NumAchieved == $NumPossibleAchievements )
+                            {
+                                my $done = RAB::SQL::CheckGameIsDone($user_tw,$GameID,'normal');
+
+                                if ( $done eq 'already_in_db')
+                                { #We don't do this one
+                                }
+                                else
+                                {
+                                    $mode        = 'normal';
+                                    $gamePercent = sprintf("%.0f", 100*$NumAchieved/$NumPossibleAchievements);
+                                    $kudos_end   = ' !';
+                                    $goodtogo    = 'ok';
+                                    $score       = $ScoreAchieved;
+                                    $achieved    = $NumAchieved;
+                                }
+                            }
+                            else
+                            { # Game not finished, then no tweet
                             }
                         }
                         else
-                        { # Game not finished, then no tweet
+                        { # Game already completed in hardcore
                         }
                     }
-                    else
-                    { # Game already completed in hardcore
+
+                    if ( $goodtogo and $goodtogo eq 'ok' )
+                    {
+                        RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon});
+                        RAB::Sprites::create($user_tw, $GameID, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, $mode, $ScoreAchieved, $NumPossibleAchievements);
+
+                        my $kudos  = "\@$user_tw Kudos, ";
+                           $kudos .= "with $achieved/$NumPossibleAchievements Achievements unlocked, ";
+                           $kudos .= "you completed $GameTitle ($JSON->[$X{$id}]->{ConsoleName})[$GameID]";
+                           $kudos .= $kudos_end;
+                        my $tweet = RAB::Twitter::FormatTweet($kudos);
+
+                        # We send the tweet about the game
+                        eval
+                        {
+                            RAB::Twitter::SendTweetMedia($tweet,"$spritesdir/img/$user_tw/$GameID.png");
+                            logEntry( "[\@$user_tw:$user_ra]     RAB::Twitter::SendTweetMedia(...) DONE");
+                        } or do {
+                            my $error = $@ || 'Unknown failure';
+                            chomp ($error);
+                            logEntry("[\@$user_tw:$user_ra]     RAB::Twitter::SendTweetMedia(...) FAIL: $error");
+                            # We next here to avoid marking a game in DB if tweet not sent
+                            next;
+                        };
+
+                        # We mark the game as DONE in DB
+                        eval
+                        {
+                            RAB::SQL::SetGameAsDone($user_tw,$GameID,$mode);
+                            logEntry( "[\@$user_tw:$user_ra]     RAB::SQL::SetGameAsDone($user_tw,$GameID,$mode) DONE");
+                        } or do {
+                            my $error = $@ || 'Unknown failure';
+                            chomp ($error);
+                            logEntry("[\@$user_tw:$user_ra]     RAB::SQL::SetGameAsDone($user_tw,$GameID,$mode) FAIL: $error");
+                        };
                     }
                 }
-
-                if ( $goodtogo and $goodtogo eq 'ok' )
-                {
-                    RAB::Sprites::fetch($JSON->[$X{$id}]->{ImageIcon});
-                    RAB::Sprites::create($user_tw, $GameID, $JSON->[$X{$id}]->{ImageIcon}, $gamePercent, $mode, $ScoreAchieved, $NumPossibleAchievements);
-
-                    my $kudos  = "\@$user_tw Kudos, ";
-                       $kudos .= "with $achieved/$NumPossibleAchievements Achievements unlocked, ";
-                       $kudos .= "you completed $GameTitle ($JSON->[$X{$id}]->{ConsoleName})[$GameID]";
-                       $kudos .= $kudos_end;
-                    my $tweet = RAB::Twitter::FormatTweet($kudos);
-
-                    # We send the tweet about the game
-                    eval
-                    {
-                        RAB::Twitter::SendTweetMedia($tweet,"$spritesdir/img/$user_tw/$GameID.png");
-                        logEntry( "[\@$user_tw:$user_ra]     RAB::Twitter::SendTweetMedia(...) DONE");
-                    } or do {
-                        my $error = $@ || 'Unknown failure';
-                        chomp ($error);
-                        logEntry("[\@$user_tw:$user_ra]     RAB::Twitter::SendTweetMedia(...) FAIL: $error");
-                        # We next here to avoid marking a game in DB if tweet not sent
-                        next;
-                    };
-
-                    # We mark the game as DONE in DB
-                    eval
-                    {
-                        RAB::SQL::SetGameAsDone($user_tw,$GameID,$mode);
-                        logEntry( "[\@$user_tw:$user_ra]     RAB::SQL::SetGameAsDone($user_tw,$GameID,$mode) DONE");
-                    } or do {
-                        my $error = $@ || 'Unknown failure';
-                        chomp ($error);
-                        logEntry("[\@$user_tw:$user_ra]     RAB::SQL::SetGameAsDone($user_tw,$GameID,$mode) FAIL: $error");
-                    };
-                }
+            }
+            else
+            {
+                logEntry("[\@$user_tw:$user_ra] RAB::RAAPI::GetUserProgress($user_ra,\@csv) WARN: Empty response");
             }
         }
     }
