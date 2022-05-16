@@ -1,34 +1,54 @@
+apiVersion: v1
+kind: Namespace
+
+metadata:
+  name: ra-completion
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: ra-completion
+  name: ra-completion
+type: Opaque
+stringData:
+  RAUSER: '<RAUSER>'
+  RAKEY: '<RAKEY>'
+  TWITTCK: '<TWITTCK>'
+  TWITTST: '<TWITTST>'
+  TWITTAT: '<TWITTAT>'
+  TWITTTS: <TWITTTS>
+  sql-user: '<sql-user>'
+  sql-pass: '<sql-pass>'
+  sql-host: '<sql-host>'
+  sql-db:   '<sql-db>'
+  sql-port: '<sql-port>'
+---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ra-completion
   namespace: ra-completion
   labels:
-    app: perl
+    app: ra-completion
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: perl
+      app: ra-completion
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: perl
+        app: ra-completion
     spec:
       restartPolicy: Always
 
       containers:
       - name: ra-completion
-        image: alpine:3.14
-        command: ["/bin/sh"]
-        args: [
-         "-c",
-         "(
-              wget -O - https://raw.githubusercontent.com/lordslair/ra-completion/master/code/entrypoint.sh | sh
-          ) || echo 1"
-        ]
+        image: lordslair/ra-completion:latest
         env:
         - name: RAUSER
           valueFrom:
