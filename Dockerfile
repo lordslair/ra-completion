@@ -20,7 +20,9 @@ COPY                 requirements.txt /requirements.txt
 COPY --chown=rac:rac /code            /code
 
 RUN apk update --no-cache \
-    && apk add --no-cache python3 \
+    && apk add --no-cache imagemagick \
+                          libjpeg \
+                          python3 \
     && apk add --no-cache --virtual .build-deps \
                                     gcc \
                                     g++ \
