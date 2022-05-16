@@ -145,24 +145,23 @@ def check_ra_updates():
                     # 3- We build the global Sprite
                     try:
                         ImageGenerated = wand_sprite_create(game,score)
-                        print(ImageGenerated)
                     except Exception as e:
                         logger.error(f'[{user.user_ra}] Game Image creation KO [{e}]')
                         continue
                     else:
-                        logger.info(f"[{user.user_ra}] Game Image creation OK")
+                        logger.info(f"[{user.user_ra}] Game Image creation OK ({ImageGenerated})")
 
                     # We send the tweet about it
                     try:
 
                         kudos  = f"@{user.user_twitter} Kudos. "
-                        kudos += f"with {game['NumAwarded']}/{game['MaxPossible']} Achievements unlocked, "
+                        kudos += f"With {game['NumAwarded']}/{game['MaxPossible']} Achievements unlocked, "
                         kudos += f"you completed {game['Title']} ({game['ConsoleName']})[{game['GameID']}]"
                         kudos += kudos_end
                         logger.info(f"Tweeting: {kudos}")
-                        #api.update_status(
-                        #    status=f"@{user.user_twitter} Kudos.{kudos} "
-                        #)
+                        api.update_status(
+                            status = kudos
+                        )
                     except Exception as e:
                         logger.error(f'[{user.user_ra}] Kudos send KO (@{user.user_twitter}) [{e}]')
                         continue
@@ -192,7 +191,7 @@ def main():
         check_ra_updates()
         # Job is done, now we wait
         logger.info("Waiting...")
-        time.sleep(60)
+        time.sleep(300)
 
 if __name__ == "__main__":
     main()
