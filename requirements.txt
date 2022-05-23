@@ -32,7 +32,7 @@ requests-oauthlib==1.3.1
     # via tweepy
 sqlalchemy==1.4.36
     # via -r requirements.in
-tweepy==4.9.0
+tweepy==4.10.0
     # via -r requirements.in
 urllib3==1.26.9
     # via requests
