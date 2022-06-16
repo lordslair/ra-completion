@@ -35,6 +35,7 @@ jobs:
       env:
           RAUSER: ${{ secrets.RAUSER }}
           RAGAME: ${{ secrets.RAGAME }}
+          RAKEY:  ${{ secrets.RAKEY  }}
       run: |
         env
         pytest code/pytest_raapi.py
