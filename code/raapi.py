@@ -67,7 +67,7 @@ def raapi_game_score_get(ra_user,game):
         return None
 
 def raapi_game_icon_get(game):
-    ImageIconPath = '/code/sprites/icon'
+    ImageIconPath = 'sprites/icon'
     ImageIcon     = game['ImageIcon'].split('/')[2]
     url           = f'{API_URL}/Images/{ImageIcon}'
 
