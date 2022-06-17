@@ -17,3 +17,9 @@ TWITTCK = os.environ['TWITTCK']
 TWITTST = os.environ['TWITTST']
 TWITTAT = os.environ['TWITTAT']
 TWITTTS = os.environ['TWITTTS']
+
+if os.environ.get("CI"):
+    # Here we are inside GitHub CI process
+    SPRITES_PATH = 'code/sprites'
+else:
+    SPRITES_PATH = 'sprites'

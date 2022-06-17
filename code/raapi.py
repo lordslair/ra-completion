@@ -8,6 +8,8 @@ from PIL                        import Image
 from io                         import BytesIO
 from loguru                     import logger
 
+from variables                  import SPRITES_PATH
+
 API_URL  = 'https://retroachievements.org'
 API_USER = os.environ['RAUSER']
 API_KEY  = os.environ['RAKEY']
@@ -67,7 +69,7 @@ def raapi_game_score_get(ra_user,game):
         return None
 
 def raapi_game_icon_get(game):
-    ImageIconPath = 'sprites/icon'
+    ImageIconPath = f'{SPRITES_PATH}/icon'
     ImageIcon     = game['ImageIcon'].split('/')[2]
     url           = f'{API_URL}/Images/{ImageIcon}'
 

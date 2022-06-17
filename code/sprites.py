@@ -3,9 +3,11 @@
 from wand.image                 import Image
 from loguru                     import logger
 
-ImageIconPath = '/code/sprites/icon'
-ImageBasePath = '/code/sprites/base'
-ImageGeneratedPath = '/code/sprites/generated'
+from variables                  import SPRITES_PATH
+
+ImageIconPath      = f'{SPRITES_PATH}/icon'
+ImageBasePath      = f'{SPRITES_PATH}/base'
+ImageGeneratedPath = f'{SPRITES_PATH}/generated'
 
 def wand_sprite_resize(game):
     ImageIcon     = game['ImageIcon'].split('/')[2]
