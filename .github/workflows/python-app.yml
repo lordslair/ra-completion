@@ -16,8 +16,8 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    
-    environment: 
+
+    environment:
       name: testing
 
     steps:
@@ -33,9 +33,13 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Test with pytest
       env:
-          RAUSER: ${{ secrets.RAUSER }}
-          RAGAME: ${{ secrets.RAGAME }}
-          RAKEY:  ${{ secrets.RAKEY  }}
+          RAUSER:  ${{ secrets.RAUSER }}
+          RAGAME:  ${{ secrets.RAGAME }}
+          RAKEY:   ${{ secrets.RAKEY  }}
+          TWITTCK: ${{ secrets.TWITTCK }}
+          TWITTST: ${{ secrets.TWITTST }}
+          TWITTAT: ${{ secrets.TWITTAT }}
+          TWITTTS: ${{ secrets.TWITTTS }}
       run: |
         env
         pytest code/pytest_raapi.py
