@@ -14,6 +14,7 @@ type: Opaque
 stringData:
   RAUSER: '<RAUSER>'
   RAKEY: '<RAKEY>'
+  RAGAME: '<RAGAME>'
   TWITTCK: '<TWITTCK>'
   TWITTST: '<TWITTST>'
   TWITTAT: '<TWITTAT>'
@@ -60,6 +61,11 @@ spec:
             secretKeyRef:
               name: ra-completion
               key: RAKEY
+        - name: RAGAME
+          valueFrom:
+            secretKeyRef:
+              name: ra-completion
+              key: RAGAME
         - name: TWITTCK
           valueFrom:
             secretKeyRef:
