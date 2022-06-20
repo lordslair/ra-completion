@@ -41,5 +41,4 @@ jobs:
           TWITTAT: ${{ secrets.TWITTAT }}
           TWITTTS: ${{ secrets.TWITTTS }}
       run: |
-        env
-        pytest code/pytest_raapi.py
+        pytest pytest_*.py
