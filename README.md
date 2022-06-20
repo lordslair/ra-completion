@@ -18,7 +18,8 @@ Actually, as 3.0, it works this way, as soon as you send your RA username to the
 ```
 .
 ├── code                              |
-│   ├── mysql                         | MySQL connector, models and methods
+│   ├── mysql                         |  MySQL connector, models and methods
+│   ├── pytest_*.py                   |  PyTest files used during CI stages
 │   ├── ra-completion.py              |  Main script, the Docker endpoint daemon who does all the work
 │   ├── raapi.py                      |  module to handle RA.org API
 │   ├── sprites.py                    |  module to handle Imagemagick/wand/PIL jobs
@@ -48,7 +49,7 @@ And of course GitHub to store all these shenanigans.
 The core and its dependencies are meant to run in a Docker/k8s environment.  
 Could work without it, but more practical to maintain this way.  
 
-Every part is kept in a different k8s file separately for more details.  
+Before running, you will need to put MySQL, Twitter & RA API credentials in the secrets block in `k8s-deployment.yaml`.  
 
 ```
 $ git clone https://github.com/lordslair/ra-completion
