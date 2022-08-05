@@ -91,7 +91,7 @@ def check_mentions(api, since_id):
 
     return new_since_id
 
-def check_ra_updates():
+def check_ra_updates(api):
     users = db_user_get_all()
     if not users:
         logger.warning('Users list looks empty - Skipping iteration')
@@ -159,7 +159,8 @@ def check_ra_updates():
                         kudos += f"you completed {game['Title']} ({game['ConsoleName']})[{game['GameID']}]"
                         kudos += kudos_end
                         logger.info(f"Tweeting: {kudos}")
-                        api.update_status(
+                        api.update_status_with_media(
+                            filename = ImageGenerated,
                             status = kudos
                         )
                     except Exception as e:
@@ -188,7 +189,7 @@ def main():
         # We check mentions, add/del users if needed
         since_id = check_mentions(api, since_id)
         # We loop on users to query RAAPI
-        check_ra_updates()
+        check_ra_updates(api)
         # Job is done, now we wait
         logger.info("Waiting...")
         time.sleep(300)
