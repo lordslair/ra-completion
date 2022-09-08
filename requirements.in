@@ -1,4 +1,4 @@
-cryptography              ~= 37.0
+cryptography              ~= 38.0
 dataclasses               ~= 0.6
 loguru                    ~= 0.6
 Pillow                    ~= 9.1
