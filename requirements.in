@@ -4,5 +4,5 @@ loguru                    ~= 0.6
 Pillow                    ~= 9.1
 pyMySQL                   ~= 1.0
 SQLAlchemy                ~= 1.4
-tweepy                    ~= 4.10
+tweepy                    ~= 4.11
 wand                      ~= 0.6
