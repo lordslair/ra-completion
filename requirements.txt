@@ -24,7 +24,7 @@ oauthlib==3.2.1
     # via
     #   requests-oauthlib
     #   tweepy
-pillow==9.3.0
+pillow==9.4.0
     # via -r requirements.in
 pycparser==2.21
     # via cffi
