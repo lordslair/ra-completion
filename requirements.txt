@@ -42,5 +42,5 @@ tweepy==4.12.0
     # via -r requirements.in
 urllib3==1.26.11
     # via requests
-wand==0.6.10
+wand==0.6.11
     # via -r requirements.in
